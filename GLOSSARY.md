@@ -2,7 +2,10 @@
 
 **Technique**: A reusable way of building software (an architecture, a validation approach, a frontend approach) that a project may adopt. Independent of any business domain.
 
-**Technique skill**: A skill that teaches one Technique and can both scaffold it into a new project and apply it to an existing one. Usable on its own; never requires another Technique skill.
+**Technique skill**: A skill that teaches one Technique and can both scaffold it into a new project and apply it to an existing one. It scaffolds by handing off to the Bare project skill, then applying the Technique. Usable on its own; never requires another Technique skill.
+
+**Bare project skill**: A skill that creates a new Quarkus project with no Techniques applied. Technique skills (when scaffolding) and the Setup guide hand off to it; it knows nothing about Techniques.
+_Avoid_: setup skill (confusable with Setup guide)
 
 **Setup guide**: A guiding skill that walks the user through starting a new project, asking which Techniques to adopt and handing off to the matching Technique skills. Declining a Technique there never prevents applying it later.
 
