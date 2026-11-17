@@ -14,3 +14,5 @@
 
 **Skill test**: A test, kept in this repo next to the skills, that checks a Technique skill works the way a unit test checks code: the skill is run against a throwaway project and the resulting project is verified by its own tests (e.g. browser tests). There are two kinds per Technique skill: scaffolding a new throwaway project, and applying the skill to an existing throwaway project.
 _Avoid_: eval (reserved for whatever tooling ends up running skill tests)
+
+**Fixture project**: The throwaway project an apply Skill test starts from, standing in for an existing project (e.g. a plain Quarkus project, or one already using the Triptych architecture). Generated fresh for each run, never kept.
