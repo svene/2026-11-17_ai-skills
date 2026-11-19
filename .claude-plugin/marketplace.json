@@ -1,0 +1,16 @@
+{
+  "name": "svenemarket",
+  "owner": {
+    "name": "Sven Ehrke"
+  },
+  "metadata": {
+    "description": "Sven Ehrke's personal one-plugin marketplace for the seswdevskills plugin."
+  },
+  "plugins": [
+    {
+      "name": "seswdevskills",
+      "source": "./",
+      "description": "Software-development skills for Quarkus multi-module projects."
+    }
+  ]
+}

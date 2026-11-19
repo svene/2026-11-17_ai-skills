@@ -1,0 +1,10 @@
+{
+  "name": "seswdevskills",
+  "description": "Software-development skills for Quarkus multi-module projects: Setup guide, Bare project, and Technique skills (triptych architecture, validation, htmx + Hono, Playwright).",
+  "author": {
+    "name": "Sven Ehrke"
+  },
+  "homepage": "https://github.com/svene/2026-11-17_ai-skills",
+  "repository": "https://github.com/svene/2026-11-17_ai-skills",
+  "license": "MIT"
+}
