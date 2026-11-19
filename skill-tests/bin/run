@@ -52,7 +52,7 @@ commit_all() {
   (cd "$project" && { [ -d .git ] || git init -q; } && git add -A && git commit -q --allow-empty -m "$1") >>"$log" 2>&1
 }
 
-# setup <case-dir>: build the project from the case's `setup` chain plus optional `fixture/` overlay.
+# setup <case-dir>: build the project from the case's `setup` chain, the optional `fixture/` overlay and `fixture-remove` list.
 # Each setup line: <skill>[/<script>] [args...]; runs $PLUGIN_DIR/skills/<skill>/scripts/<script|run.sh> <project-dir> [args...]
 setup() {
   local c=$1 line step skill script args
@@ -69,6 +69,14 @@ setup() {
     done <"$c/setup"
   fi
   [ -d "$c/fixture" ] && copy_tree "$c/fixture" "$project"
+  if [ -f "$c/fixture-remove" ]; then
+    while IFS= read -r line || [ -n "$line" ]; do
+      line=${line%%#*}; line=${line%"${line##*[![:space:]]}"}; [ -z "$line" ] && continue
+      case $line in /*|*..*) echo "fixture-remove: path must be relative and stay inside the project: $line" | tee -a "$log"; return 1 ;; esac
+      [ -e "$project/$line" ] || { echo "fixture-remove: no $line in the project" | tee -a "$log"; return 1; }
+      rm -rf "${project:?}/$line"
+    done <"$c/fixture-remove"
+  fi
   commit_all "skilltest: setup"
 }
 
@@ -144,7 +152,7 @@ load_config() {
 # ---------- one test case ----------
 # run_case <skill> <fresh|apply> <case>  -> prints result line, returns 0 pass/skip, 1 fail
 run_case() {
-  local skill=$1 kind=$2 name=$3 c="$TESTS_DIR/$1/$2/$3" status=0 cost=0 turns=- why=""
+  local skill=$1 kind=$2 name=$3 c="$TESTS_DIR/$1/$2/$3" status=0 cost=0 turns=- denied=0 why=""
   [ -d "$c" ] || die "no test case $c"
   load_config "$c"
   if ! why=$(requirements_met "$c"); then echo "SKIP $skill $kind/$name ($why)"; return 0; fi
@@ -154,7 +162,7 @@ run_case() {
     local r=PASS where=""
     [ "$status" -ne 0 ] && r=FAIL
     if [ "$status" -eq 0 ] && [ $keep -eq 0 ]; then rm -rf "$run"; else where=" (kept: $run)"; fi
-    echo "$r $skill $kind/$name total_cost_usd=$cost num_turns=$turns$where"
+    echo "$r $skill $kind/$name total_cost_usd=$cost num_turns=$turns denials=$denied$where"
     return "$status"
   }
 
@@ -186,12 +194,13 @@ EOF
   result
 }
 
-# run_claude <case-dir>: headless apply run; sets cost/turns; fails on error, caps and permission denials.
+# run_claude <case-dir>: headless apply run; sets cost/turns/denied; fails on error and caps.
+# Permission denials are only warned about: the result is judged by verify, and agents recover from them.
 run_claude() {
   local c=$1 iso out="$run/claude.jsonl" res sub
   # --bare needs ANTHROPIC_API_KEY (it never reads OAuth); otherwise isolate via setting sources.
   if [ -n "${ANTHROPIC_API_KEY:-}" ]; then iso=(--bare); else iso=(--setting-sources project --strict-mcp-config); fi
-  local allowed="Read Edit Write Glob Grep Skill Bash(mvn:*) Bash(./mvnw:*) Bash(npm:*) Bash(npx:*) Bash(git:*) Bash(ls:*) Bash($PLUGIN_DIR/skills/*) Bash(bash $PLUGIN_DIR/skills/*)"
+  local allowed="Read Edit Write Glob Grep Skill Bash(mvn:*) Bash(./mvnw:*) Bash(npm:*) Bash(npx:*) Bash(git:*) Bash(ls:*) Bash(cat:*) Bash(head:*) Bash(tail:*) Bash(find:*) Bash(grep:*) Bash(wc:*) Bash($PLUGIN_DIR/skills/*) Bash(bash $PLUGIN_DIR/skills/*)"
   echo "== claude -p ${iso[*]} --model $MODEL --max-budget-usd $MAX_BUDGET_USD --max-turns $MAX_TURNS" >>"$log"
   (cd "$project" && claude -p "${iso[@]}" --plugin-dir "$PLUGIN_DIR" --model "$MODEL" \
       --max-budget-usd "$MAX_BUDGET_USD" --max-turns "$MAX_TURNS" \
@@ -204,7 +213,8 @@ run_claude() {
   sub=$(jq -r '.subtype // ""' <<<"$res")
   [ "$(jq -r '.is_error' <<<"$res")" = false ] && [ "$sub" = success ] || { echo "claude run failed: $sub"; return 1; }
   local denials; denials=$(jq -c '.permission_denials // [] | map(.tool_name + " " + ((.tool_input.command // .tool_input.file_path // "") | tostring))' <<<"$res")
-  [ "$denials" = "[]" ] || { echo "permission denials: $denials"; return 1; }
+  denied=$(jq 'length' <<<"$denials")
+  [ "$denied" -eq 0 ] || echo "WARN permission denials ($denied): $denials" | tee -a "$log"
   return 0
 }
 
