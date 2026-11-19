@@ -1,0 +1,254 @@
+#!/usr/bin/env bash
+# Skill test runner. See skill-tests/README.md.
+#
+#   run                                        every fresh test (no LLM)
+#   run --all-apply                            every fresh and every apply test
+#   run <skill> [fresh|apply] [<case>]         one skill / kind / case
+#   run <skill> verify <project-dir> [<case>]  verify a project after a --manual apply run
+#
+# options: --model <alias>  --manual  --keep
+# Env overrides (used by the self-test): PLUGIN_DIR, TESTS_DIR.
+set -uo pipefail
+
+here=$(cd "$(dirname "$0")/.." && pwd)
+self="$here/bin/run"; env_prefix=""
+[ -n "${PLUGIN_DIR:-}${TESTS_DIR:-}" ] && env_prefix="PLUGIN_DIR=${PLUGIN_DIR:-} TESTS_DIR=${TESTS_DIR:-} "
+PLUGIN_DIR=${PLUGIN_DIR:-$(cd "$here/.." && pwd)}
+TESTS_DIR=${TESTS_DIR:-$here}
+
+DEFAULT_MODEL=sonnet DEFAULT_MAX_BUDGET_USD=0.50 DEFAULT_MAX_TURNS=30
+
+die() { echo "run: $*" >&2; exit 2; }
+
+# ---------- argument parsing ----------
+model="" manual=0 keep=0 all_apply=0 pos=()
+while [ $# -gt 0 ]; do
+  case $1 in
+    --model) model=${2:?--model needs a value}; shift ;;
+    --manual) manual=1 ;;
+    --keep) keep=1 ;;
+    --all-apply) all_apply=1 ;;
+    -h|--help) sed -n '2,11p' "$0"; exit 0 ;;
+    -*) die "unknown option $1" ;;
+    *) pos+=("$1") ;;
+  esac
+  shift
+done
+
+[ -f "$here/versions.env" ] && { set -a; . "$here/versions.env"; set +a; }
+# Deterministic identity for commits the runner makes in throwaway projects.
+export GIT_AUTHOR_NAME=skilltest GIT_AUTHOR_EMAIL=skilltest@localhost
+export GIT_COMMITTER_NAME=skilltest GIT_COMMITTER_EMAIL=skilltest@localhost
+
+# ---------- helpers (operate on globals: run, log, project, tdir) ----------
+
+# copy_tree <src> <dst>: copy a directory's contents, leaving out runner control files.
+copy_tree() {
+  (cd "$1" && tar cf - --exclude=./check.sh --exclude=./expect .) | (cd "$2" && tar xf -)
+}
+
+# commit_all <message>: snapshot the project so later steps can be reset to it.
+commit_all() {
+  (cd "$project" && { [ -d .git ] || git init -q; } && git add -A && git commit -q --allow-empty -m "$1") >>"$log" 2>&1
+}
+
+# setup <case-dir>: build the project from the case's `setup` chain plus optional `fixture/` overlay.
+# Each setup line: <skill>[/<script>] [args...]; runs $PLUGIN_DIR/skills/<skill>/scripts/<script|run.sh> <project-dir> [args...]
+setup() {
+  local c=$1 line step skill script args
+  mkdir -p "$project"
+  if [ -f "$c/setup" ]; then
+    while IFS= read -r line || [ -n "$line" ]; do
+      line=${line%%#*}; read -r -a args <<<"$line"; [ ${#args[@]} -eq 0 ] && continue
+      step=${args[0]}; args=("${args[@]:1}")
+      skill=${step%%/*}; script=run.sh; [ "$step" != "$skill" ] && script=${step#*/}
+      local s="$PLUGIN_DIR/skills/$skill/scripts/$script"
+      [ -x "$s" ] || { echo "setup: no executable $s" | tee -a "$log"; return 1; }
+      echo "== setup: $skill/$script ${args[*]}" >>"$log"
+      "$s" "$project" "${args[@]}" >>"$log" 2>&1 || { echo "setup step failed: $step (see log)"; return 1; }
+    done <"$c/setup"
+  fi
+  [ -d "$c/fixture" ] && copy_tree "$c/fixture" "$project"
+  commit_all "skilltest: setup"
+}
+
+# verify_project <case-dir>: copy in verify/, then mvn verify, e2e suites, verify/check.sh.
+verify_project() {
+  local c=$1 v=$1/verify d mvn
+  [ -d "$v" ] && copy_tree "$v" "$project"
+  if [ -f "$project/pom.xml" ]; then
+    mvn=mvn; [ -x "$project/mvnw" ] && mvn=./mvnw
+    echo "== verify: $mvn verify" >>"$log"
+    (cd "$project" && $mvn -B verify) >>"$log" 2>&1 || { echo "verify: $mvn verify failed"; return 1; }
+  fi
+  for d in "$project"/e2e*/; do
+    [ -f "$d/package.json" ] || continue
+    echo "== verify: e2e $(basename "$d")" >>"$log"
+    (cd "$d" && { [ -f package-lock.json ] && npm ci || npm install; } && npx playwright install chromium && npm test) >>"$log" 2>&1 \
+      || { echo "verify: e2e $(basename "$d") failed"; return 1; }
+  done
+  if [ -x "$v/check.sh" ]; then
+    echo "== verify: check.sh" >>"$log"
+    (cd "$project" && RUN_LOG="$log" "$v/check.sh") >>"$log" 2>&1 || { echo "verify: check.sh failed"; return 1; }
+  fi
+  return 0
+}
+
+# verify_fails <case-dir>: each verify-fails/<name>/ is planted on its own and must make verification fail
+# (and, if it has an `expect` file, the log of that failing run must match each of its regexes).
+verify_fails() {
+  local c=$1 f name flog
+  [ -d "$c/verify-fails" ] || return 0
+  commit_all "skilltest: verified"
+  for f in "$c"/verify-fails/*/; do
+    name=$(basename "$f"); flog="$run/verify-fails-$name.log"
+    copy_tree "$f" "$project"
+    if log=$flog verify_project "$c" >/dev/null; then
+      echo "verify-fails/$name: verification passed, expected it to fail"; return 1
+    fi
+    if [ -f "$f/expect" ] && ! regexes_match "$f/expect" "$flog"; then
+      echo "verify-fails/$name: failed, but not for the expected reason (see $flog)"; return 1
+    fi
+    echo "== verify-fails/$name: failed as expected" >>"$log"
+    (cd "$project" && git reset -q --hard && git clean -qfdx -e target) >>"$log" 2>&1
+  done
+}
+
+# regexes_match <regex-file> <text-file>: every non-empty, non-# line must match (extended, case-insensitive).
+regexes_match() {
+  local re ok=0
+  while IFS= read -r re || [ -n "$re" ]; do
+    [ -z "$re" ] || [ "${re:0:1}" = "#" ] && continue
+    grep -Eiq -- "$re" "$2" || { echo "no match for: $re" >>"$log"; ok=1; }
+  done <"$1"
+  return $ok
+}
+
+# requirements_met <case-dir>: REQUIRES in config is a space-separated list of commands; docker must also be running.
+requirements_met() {
+  local r
+  for r in ${REQUIRES:-}; do
+    command -v "$r" >/dev/null 2>&1 || { echo "requires $r"; return 1; }
+    [ "$r" = docker ] && ! docker info >/dev/null 2>&1 && { echo "requires a running docker"; return 1; }
+  done
+  return 0
+}
+
+load_config() {
+  MODEL=$DEFAULT_MODEL MAX_BUDGET_USD=$DEFAULT_MAX_BUDGET_USD MAX_TURNS=$DEFAULT_MAX_TURNS REQUIRES=""
+  [ -f "$1/config" ] && . "$1/config"
+  [ -n "$model" ] && MODEL=$model
+  return 0
+}
+
+# ---------- one test case ----------
+# run_case <skill> <fresh|apply> <case>  -> prints result line, returns 0 pass/skip, 1 fail
+run_case() {
+  local skill=$1 kind=$2 name=$3 c="$TESTS_DIR/$1/$2/$3" status=0 cost=0 turns=- why=""
+  [ -d "$c" ] || die "no test case $c"
+  load_config "$c"
+  if ! why=$(requirements_met "$c"); then echo "SKIP $skill $kind/$name ($why)"; return 0; fi
+
+  run=$(mktemp -d -t skilltest-XXXXXX); log="$run/log.txt"; project="$run/project"; : >"$log"
+  result() {
+    local r=PASS where=""
+    [ "$status" -ne 0 ] && r=FAIL
+    if [ "$status" -eq 0 ] && [ $keep -eq 0 ]; then rm -rf "$run"; else where=" (kept: $run)"; fi
+    echo "$r $skill $kind/$name total_cost_usd=$cost num_turns=$turns$where"
+    return "$status"
+  }
+
+  setup "$c" || { status=1; result; return; }
+
+  if [ "$kind" = apply ]; then
+    [ -f "$c/prompt.md" ] || { echo "missing $c/prompt.md"; status=1; result; return; }
+    if [ $manual -eq 1 ]; then
+      cat <<EOF
+Manual skill test: $skill apply/$name
+  1. cd $project
+  2. claude --plugin-dir $PLUGIN_DIR
+  3. paste the prompt from $c/prompt.md
+  4. when done, verify:
+     $env_prefix$self $skill verify $project $name
+EOF
+      [ -f "$c/expect-result" ] && echo "  5. check that Claude's final reply matches each regex in $c/expect-result"
+      echo "Run dir: $run (kept)"
+      return 0
+    fi
+    run_claude "$c" || status=1
+    if [ $status -eq 0 ] && [ -f "$c/expect-result" ]; then
+      regexes_match "$c/expect-result" "$run/result.txt" || { echo "final reply does not match expect-result (see $log)"; status=1; }
+    fi
+  fi
+
+  [ $status -eq 0 ] && { verify_project "$c" || status=1; }
+  [ $status -eq 0 ] && { verify_fails "$c" || status=1; }
+  result
+}
+
+# run_claude <case-dir>: headless apply run; sets cost/turns; fails on error, caps and permission denials.
+run_claude() {
+  local c=$1 iso out="$run/claude.jsonl" res sub
+  # --bare needs ANTHROPIC_API_KEY (it never reads OAuth); otherwise isolate via setting sources.
+  if [ -n "${ANTHROPIC_API_KEY:-}" ]; then iso=(--bare); else iso=(--setting-sources project --strict-mcp-config); fi
+  local allowed="Read Edit Write Glob Grep Skill Bash(mvn:*) Bash(./mvnw:*) Bash(npm:*) Bash(npx:*) Bash(git:*) Bash(ls:*) Bash($PLUGIN_DIR/skills/*) Bash(bash $PLUGIN_DIR/skills/*)"
+  echo "== claude -p ${iso[*]} --model $MODEL --max-budget-usd $MAX_BUDGET_USD --max-turns $MAX_TURNS" >>"$log"
+  (cd "$project" && claude -p "${iso[@]}" --plugin-dir "$PLUGIN_DIR" --model "$MODEL" \
+      --max-budget-usd "$MAX_BUDGET_USD" --max-turns "$MAX_TURNS" \
+      --permission-mode acceptEdits --allowedTools "$allowed" \
+      --output-format stream-json --verbose <"$c/prompt.md") >"$out" 2>>"$log"
+  res=$(grep '"type":"result"' "$out" | tail -1)
+  [ -n "$res" ] || { echo "claude run produced no result (see $out)"; return 1; }
+  cost=$(jq -r '.total_cost_usd // 0' <<<"$res"); turns=$(jq -r '.num_turns // "-"' <<<"$res")
+  jq -r '.result // ""' <<<"$res" >"$run/result.txt"
+  sub=$(jq -r '.subtype // ""' <<<"$res")
+  [ "$(jq -r '.is_error' <<<"$res")" = false ] && [ "$sub" = success ] || { echo "claude run failed: $sub"; return 1; }
+  local denials; denials=$(jq -c '.permission_denials // [] | map(.tool_name + " " + ((.tool_input.command // .tool_input.file_path // "") | tostring))' <<<"$res")
+  [ "$denials" = "[]" ] || { echo "permission denials: $denials"; return 1; }
+  return 0
+}
+
+# ---------- dispatch ----------
+cases_of() { # <skill> <kind> -> case names
+  [ -d "$TESTS_DIR/$1/$2" ] && ls "$TESTS_DIR/$1/$2"
+  return 0
+}
+skills_with_tests() {
+  local d
+  for d in "$TESTS_DIR"/*/; do
+    d=$(basename "$d"); [ "$d" = bin ] && continue
+    [ -d "$TESTS_DIR/$d/fresh" ] || [ -d "$TESTS_DIR/$d/apply" ] && echo "$d"
+  done
+  return 0
+}
+
+if [ "${pos[1]:-}" = verify ]; then
+  skill=${pos[0]}; project=${pos[2]:?verify needs a project dir}; project=$(cd "$project" && pwd)
+  name=${pos[3]:-$(cases_of "$skill" apply | head -1)}; c="$TESTS_DIR/$skill/apply/$name"
+  [ -d "$c" ] || die "no test case $c"
+  run=$(mktemp -d -t skilltest-verify-XXXXXX); log="$run/log.txt"; : >"$log"
+  if verify_project "$c" && verify_fails "$c"; then
+    echo "PASS $skill apply/$name (manual) (log: $log)"; exit 0
+  else
+    echo "FAIL $skill apply/$name (manual) (log: $log)"; exit 1
+  fi
+fi
+
+failed=0
+if [ ${#pos[@]} -eq 0 ]; then
+  [ -n "$(skills_with_tests)" ] || { echo "no skill tests found in $TESTS_DIR"; exit 0; }
+  kinds=(fresh); [ $all_apply -eq 1 ] && kinds+=(apply)
+  for skill in $(skills_with_tests); do
+    for kind in "${kinds[@]}"; do
+      for name in $(cases_of "$skill" "$kind"); do run_case "$skill" "$kind" "$name" || failed=1; done
+    done
+  done
+else
+  skill=${pos[0]}; kinds=(${pos[1]:-fresh apply})
+  for kind in "${kinds[@]}"; do
+    case $kind in fresh|apply) ;; *) die "kind must be fresh, apply or verify";; esac
+    names=${pos[2]:-$(cases_of "$skill" "$kind")}
+    for name in $names; do run_case "$skill" "$kind" "$name" || failed=1; done
+  done
+fi
+exit $failed

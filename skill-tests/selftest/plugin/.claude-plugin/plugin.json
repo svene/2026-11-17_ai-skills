@@ -1,0 +1,4 @@
+{
+  "name": "harness-selftest",
+  "description": "Test-only plugin for the skill test harness self-test. Never installed."
+}

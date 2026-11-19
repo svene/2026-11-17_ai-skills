@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# Harness self-test: runs bin/run against the test-only probe plugin. Pass --all-apply to include the (cheap, Haiku) LLM case.
+here=$(cd "$(dirname "$0")" && pwd)
+PLUGIN_DIR="$here/plugin" TESTS_DIR="$here/tests" exec "$here/../bin/run" "$@"
