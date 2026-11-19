@@ -1,0 +1,16 @@
+target/
+*.class
+/.quarkus/
+.env
+
+# IDEs
+.idea/
+*.iml
+.vscode/
+.factorypath
+.settings/
+.project
+.classpath
+
+# OS
+.DS_Store
