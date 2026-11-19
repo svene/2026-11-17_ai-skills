@@ -1,0 +1,3 @@
+# A fresh Bare project, then the Triptych scaffold on top of it.
+bare-project --group-id org.acme --artifact-id demo-app
+triptych

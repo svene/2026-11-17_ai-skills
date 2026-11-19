@@ -1,0 +1,3 @@
+# A Triptych project that lost its ArchUnit rules and its README Architecture section.
+bare-project --group-id org.acme --artifact-id shop
+triptych

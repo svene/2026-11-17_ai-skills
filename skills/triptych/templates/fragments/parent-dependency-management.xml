@@ -1,0 +1,18 @@
+      <dependency>
+        <groupId>com.tngtech.archunit</groupId>
+        <artifactId>archunit-junit5</artifactId>
+        <version>${archunit.version}</version>
+        <scope>test</scope>
+      </dependency>
+
+      <!-- Inter-module dependencies: every adapter and app-server depends on core -->
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>core</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>inbound-http-jsonapi</artifactId>
+        <version>${project.version}</version>
+      </dependency>

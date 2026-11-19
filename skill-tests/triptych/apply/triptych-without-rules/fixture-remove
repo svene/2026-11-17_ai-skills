@@ -1,0 +1,3 @@
+# The rules the triptych script added; the conformance check must bring them back.
+app-server/src/test/java/org/acme/shop/devsupport
+app-server/src/test/resources/archunit.properties

@@ -1,0 +1,3 @@
+# The slices rule of TriptychArchitecture fails, for the planted a -> b dependency.
+triptych_architecture_is_respected
+feature\.a.*feature\.b|AHandler.*BHandler
