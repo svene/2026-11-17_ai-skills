@@ -1,0 +1,18 @@
+
+    <!-- Generate META-INF/jandex.idx in every module so Quarkus discovers
+         CDI beans in the module JARs without quarkus.index-dependency config. -->
+    <plugins>
+      <plugin>
+        <groupId>io.smallrye</groupId>
+        <artifactId>jandex-maven-plugin</artifactId>
+        <version>${jandex-maven-plugin.version}</version>
+        <executions>
+          <execution>
+            <id>make-index</id>
+            <goals>
+              <goal>jandex</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>

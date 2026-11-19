@@ -1,0 +1,1 @@
+Use the triptych skill to migrate this project to the Triptych architecture. I confirm the survey plan and every stage in advance: run all stages to the end without asking. Put the REST code into an `inbound-http-jsonapi` module. Do not commit.

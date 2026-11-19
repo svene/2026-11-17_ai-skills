@@ -1,0 +1,9 @@
+    <!-- The hexagon and every adapter module; app-server only assembles them -->
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>inbound-http-jsonapi</artifactId>
+    </dependency>

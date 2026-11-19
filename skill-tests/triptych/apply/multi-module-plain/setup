@@ -1,0 +1,2 @@
+# An existing multi-module Quarkus app that is not Triptych yet: a small product REST API, all in app-server.
+bare-project --group-id org.acme --artifact-id shop

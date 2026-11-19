@@ -1,0 +1,3 @@
+# A fresh Triptych project; the skill adds an outbound HTTP client module.
+bare-project --group-id org.acme --artifact-id shop
+triptych

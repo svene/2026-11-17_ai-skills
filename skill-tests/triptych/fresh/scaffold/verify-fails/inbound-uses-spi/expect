@@ -1,0 +1,3 @@
+# The inbound rule fails, naming the planted helper.
+inbound_adapters_do_not_use_spis
+ExampleShortcut
