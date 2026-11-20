@@ -1,0 +1,2 @@
+# Dev Services starts the Kafka broker for the Quarkus tests.
+REQUIRES=docker

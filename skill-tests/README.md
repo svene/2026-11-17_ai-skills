@@ -35,7 +35,7 @@ skill-tests/
 
 | File | Meaning |
 |---|---|
-| `setup` | One step per line: `<skill>[/<script>] [args…]`. Runs `skills/<skill>/scripts/<script>` (default `run.sh`) as `<script> <project-dir> [args…]`. `#` starts a comment. With no `setup`, the project starts empty. |
+| `setup` | One step per line: `<skill>[/<script>] [args…]`. Runs `skills/<skill>/scripts/<script>` (default `run.sh`) as `<script> <project-dir> [args…]`. A step `./<script> [args…]` runs an executable script of the case directory instead, for setup no skill provides (e.g. a Technology module the skill under test needs). `#` starts a comment. With no `setup`, the project starts empty. |
 | `fixture/` | Copied over the project after `setup`, e.g. a REST resource that makes a Fixture project "existing". The project is then committed. |
 | `fixture-remove` | Paths, one per line and relative to the project, deleted after the `fixture/` overlay, e.g. to take away what a setup script added. A missing path fails the setup. `#` starts a comment. |
 | `config` | Shell variables: `MODEL` (default `sonnet`), `MAX_BUDGET_USD` (`0.50`), `MAX_TURNS` (`30`), `REQUIRES` (space-separated commands; `docker` must also be running). If a requirement is missing, the case is skipped. |
@@ -58,4 +58,4 @@ A skill that has a deterministic part ships it as `skills/<skill>/scripts/run.sh
 
 ## Self-test
 
-`selftest/run [--all-apply]` runs `bin/run` against a test-only plugin (`selftest/plugin`, skill `harness-probe`). Its cases cover the setup chain, the fixture overlay, `fixture-remove`, `check.sh`, `verify-fails` with `expect`, a `REQUIRES` skip, and one Haiku apply run with `expect-result` (about $0.003).
+`selftest/run [--all-apply]` runs `bin/run` against a test-only plugin (`selftest/plugin`, skill `harness-probe`). Its cases cover the setup chain, a case-local `./<script>` setup step, the fixture overlay, `fixture-remove`, `check.sh`, `verify-fails` with `expect`, a `REQUIRES` skip, and one Haiku apply run with `expect-result` (about $0.003).

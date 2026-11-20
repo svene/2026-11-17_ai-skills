@@ -1,0 +1,18 @@
+# Provenance
+
+From [svene/2026-07-26_quarkus-hexagon-demo-mm-per-tech](https://github.com/svene/2026-07-26_quarkus-hexagon-demo-mm-per-tech/tree/b2f849396eb60a3aae38918c7fab3033c93bb1d9) at `b2f8493`:
+
+- **The technique** and the boundary table: [`docs/architecture/validation.md`](https://github.com/svene/2026-07-26_quarkus-hexagon-demo-mm-per-tech/blob/b2f849396eb60a3aae38918c7fab3033c93bb1d9/docs/architecture/validation.md). The Kafka background: [`docs/architecture/kafka-unprocessable-messages.md`](https://github.com/svene/2026-07-26_quarkus-hexagon-demo-mm-per-tech/blob/b2f849396eb60a3aae38918c7fab3033c93bb1d9/docs/architecture/kafka-unprocessable-messages.md).
+- **`ConstructorValidation`**: [`core/…/cross/validation/ConstructorValidation.java`](https://github.com/svene/2026-07-26_quarkus-hexagon-demo-mm-per-tech/blob/b2f849396eb60a3aae38918c7fab3033c93bb1d9/core/src/main/java/org/svenehrke/triptychdemo/cross/validation/ConstructorValidation.java), copied unchanged except for the package, a Provenance comment, and a javadoc pointer to the README link instead of the source's docs.
+- **`Example` / `ParsedExample`**: modelled on [`FruitDelivery`](https://github.com/svene/2026-07-26_quarkus-hexagon-demo-mm-per-tech/blob/b2f849396eb60a3aae38918c7fab3033c93bb1d9/core/src/main/java/org/svenehrke/triptychdemo/feature/fruit/FruitDelivery.java) and [`ParsedFruitDelivery`](https://github.com/svene/2026-07-26_quarkus-hexagon-demo-mm-per-tech/blob/b2f849396eb60a3aae38918c7fab3033c93bb1d9/core/src/main/java/org/svenehrke/triptychdemo/feature/fruit/ParsedFruitDelivery.java), with the text-input constructor of the source's order types.
+- **The rule** `inbound_adapters_construct_domain_values_only_via_parse`: from [`ArchitectureTest`](https://github.com/svene/2026-07-26_quarkus-hexagon-demo-mm-per-tech/blob/b2f849396eb60a3aae38918c7fab3033c93bb1d9/app-server/src/test/java/org/svenehrke/triptychdemo/devsupport/ArchitectureTest.java), moved into its own `ValidationArchitectureTest`.
+- **The Kafka consumer and its test**: modelled on [`FruitDeliveryReceiver`](https://github.com/svene/2026-07-26_quarkus-hexagon-demo-mm-per-tech/blob/b2f849396eb60a3aae38918c7fab3033c93bb1d9/inbound-kafka/src/main/java/org/svenehrke/triptychdemo/feature/fruit/FruitDeliveryReceiver.java), [`UnprocessableMessageException`](https://github.com/svene/2026-07-26_quarkus-hexagon-demo-mm-per-tech/blob/b2f849396eb60a3aae38918c7fab3033c93bb1d9/inbound-kafka/src/main/java/org/svenehrke/triptychdemo/cross/kafka/UnprocessableMessageException.java) and [`KafkaMalformedMessageTest`](https://github.com/svene/2026-07-26_quarkus-hexagon-demo-mm-per-tech/blob/b2f849396eb60a3aae38918c7fab3033c93bb1d9/app-server/src/test/java/org/svenehrke/triptychdemo/server/KafkaMalformedMessageTest.java).
+
+The changes made when copying:
+
+- **Logging:** plain log calls replace the source's Mongo audit log, and the `<OP>_RECEIVED` / `<OP>_INVALID` / `<OP>_PROCESSING` lines replace its audit entries.
+- **HTTP 400 body:** `[{field, message}]` instead of the source's array of messages. The text overload replaces its `structureErrors` and strict JSON reader: a missing field is `must not be blank`, a non-number is `must be a number`.
+- **Kafka failure strategy:** the standard `dead-letter-queue` replaces the custom `dead-letter-or-fail-stop`. As a result, a transient failure goes to the DLQ after its retries instead of stopping the channel (see `references/boundaries/kafka.md`). `@Blocking` replaces `@RunOnVirtualThread`.
+- **Package:** `UnprocessableMessageException` moves from `cross.kafka` to `cross.messaging`.
+
+Decided in [Decide the validation skill](https://github.com/svene/2026-11-17_ai-skills/issues/12), as amended there by issues #13, #14 and #15.

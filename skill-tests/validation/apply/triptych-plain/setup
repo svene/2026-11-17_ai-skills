@@ -1,0 +1,4 @@
+# An existing Triptych project: besides triptych's example slice, an item slice whose POST /items validates a
+# DTO with @Valid and then builds the domain value with its constructor.
+bare-project --group-id org.acme --artifact-id shop
+triptych
