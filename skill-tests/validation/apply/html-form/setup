@@ -1,6 +1,6 @@
-# An existing Triptych project with an htmx form backend: inbound-http-json-vm answers {route, vm} envelopes
-# (the htmx + Hono skill's shape, which the Hono client renders to HTML). Its POST builds the domain value with
-# its constructor and parses the quantity with Integer.parseInt.
+# An existing Triptych project with the htmx + Hono frontend and an item form in its technique shape: ItemUiReceiver
+# serves the ItemForm route, ItemActionResource takes the POST. The POST builds the domain value with its
+# constructor and parses the quantity with Integer.parseInt.
 bare-project --group-id org.acme --artifact-id shop
 triptych
-./add-inbound-json-vm.sh
+htmx-hono

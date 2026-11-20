@@ -1,6 +1,6 @@
 # inbound-http-html
 
-Server-rendered HTML pages. (For htmx pages with view models, use the htmx skill instead; it owns `inbound-http-json-vm`.)
+Server-rendered HTML pages. (For htmx pages with view models, use the htmx-hono skill instead; it owns `inbound-http-json-vm`.)
 
 **Extensions:** `io.quarkus:quarkus-rest`, `io.quarkus:quarkus-rest-jackson`.
 
