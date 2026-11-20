@@ -11,7 +11,7 @@ for f in $m/pom.xml $m/package.json $m/package-lock.json $m/tsconfig.json \
          $j/cross/htmlrender/generated/types/{vm-types.d.ts,web-api.ts} \
          $j/cross/devreload/{DevReloadSSE,JsBundleWatcher}.java \
          $j/feature/example/{ExampleUiReceiver,ExampleActionResource}.java \
-         $m/src/main/resources/META-INF/resources/{index.html,js/dev-reload.js,js/htmx/4.0.0/htmx.js,css/bulma/1.0.4/bulma.min.css} \
+         $m/src/main/resources/META-INF/resources/{index.html,js/dev-reload.js,js/htmx/4.0.2/htmx.js,css/bulma/1.0.4/bulma.min.css} \
          $m/target/classes/META-INF/resources/js/hono/hx-hono.js \
          core/src/main/java/$p/feature/example/ExampleGuestbookHandler.java \
          app-server/src/test/java/$p/feature/example/ExampleUiTest.java; do
