@@ -4,7 +4,7 @@
 # Adds the htmx + Hono frontend to a Triptych project:
 #   - a new inbound-http-json-vm module (registered in the parent's modules and dependencyManagement and as an
 #     app-server dependency): typescript-generator, frontend-maven-plugin (Node, npm ci, tsc, esbuild), the vendored
-#     htmx 4, index.html, the hono extension and the cross.htmlrender and cross.devreload infrastructure
+#     htmx 4 and Bulma 1, index.html, the hono extension and the cross.htmlrender and cross.devreload infrastructure
 #   - the example slice's guestbook page: ExampleGuestbookHandler in core; view models, ExampleUiReceiver,
 #     ExampleActionResource and the Hono templates in inbound-http-json-vm; ExampleUiTest in app-server
 #   - the .gitignore entries and the README link
@@ -71,6 +71,7 @@ for f in "$templates"/infra/devreload/*; do put "infra/devreload/${f##*/}" "$jav
 put infra/resources/index.html "$res/index.html"
 put infra/resources/js/dev-reload.js "$res/js/dev-reload.js"
 put infra/resources/js/htmx.js "$res/js/htmx/4.0.0/htmx.js"
+put infra/resources/css/bulma.min.css "$res/css/bulma/1.0.4/bulma.min.css"
 
 # The example slice
 put example/core/ExampleGuestbookHandler.java "core/src/main/java/$example/ExampleGuestbookHandler.java"

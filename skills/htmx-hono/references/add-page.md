@@ -16,6 +16,7 @@ A page is a component route like any other; `ExamplePage` is one that composes t
 8. **Templates.** One `<x>-<component>.ts` per route next to the VMs, each exporting `<RouteName> = (vm: <RouteName>VM): HtmlResult => html\`…\``. Templates follow these rules:
    - Component URLs come from `nameUrl` / `nameIdUrl`, event names from `eventName`, mutation URLs from the API client (`hx-post="${<x>Api.save()}"`). A string literal URL slips past the type check.
    - A component that shows changed data re-fetches itself: `hx-get="${nameUrl("<X>…")}" hx-trigger="${eventName("<X>…")} from:body" hx-swap="outerHTML"`.
+   - Markup uses Bulma's classes, as the guestbook does: `field`/`control`/`label`/`input`, `button`, and `help is-danger` under a field with an error (plus `is-danger` on its input).
    - A form's errors are typed `Partial<Record<keyof <X>FormVM, string>>`, and the 400 re-renders the form into the same target (`hx-target`, `hx-swap="outerHTML"`).
 9. **Wire.**
    - `routes.ts`: one `<RouteName>: {url: () => nameUrl("<RouteName>"), render: <RouteName>}` entry per route.

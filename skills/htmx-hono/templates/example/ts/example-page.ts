@@ -6,9 +6,9 @@ import {ExampleSignForm} from "./example-sign-form";
 
 /** The ExamplePage route: the whole page, composed of the two components. */
 export const ExamplePage = (vm: ExamplePageVM): HtmlResult => html`
-	<section>
-		<h1>Guestbook</h1>
-		${ExampleSignForm(vm.form)}
-		${ExampleGuestList(vm.guests)}
-	</section>
+	<h1 class="title">Guestbook</h1>
+	<div class="columns">
+		<div class="column is-half">${ExampleSignForm(vm.form)}</div>
+		<div class="column is-half">${ExampleGuestList(vm.guests)}</div>
+	</div>
 `;

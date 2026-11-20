@@ -35,6 +35,8 @@ Everything lives in one module, **`inbound-http-json-vm`** (JSON view models for
 
 Each component's template (`example-page.ts`) sits in its `feature.<x>` package, next to its VM. Templates use `hono/html`, no JSX.
 
+**Styling: Bulma 1, vendored** like htmx at a versioned path, `META-INF/resources/css/bulma/1.0.4/bulma.min.css`, and linked from `index.html`. No npm package, no Sass, no CDN. Templates use Bulma's classes (`title`, `box`, `columns`, `field`/`control`/`label`/`input`, `button is-primary`, `help is-danger` for a form error); `#error-banner` is a `notification is-danger`. Bulma 1 follows the OS dark mode; `data-theme="light"` on `<html>` opts out. To upgrade, vendor the new `bulma.min.css` under its own version directory and change the `<link>`.
+
 **Gotchas** (kept as comments in `hx-hono.ts` and `index.html`):
 - htmx 4 extensions are global: the hooks run for every request, whatever `hx-ext` says.
 - Hooks are synchronous: every template must be in the bundle. Lazy chunks would need a `ctx.fetch` override.
@@ -76,6 +78,7 @@ When the arguments contain a `from: setup-guide; …` line, take `dir=` and `pac
    then `./mvnw verify` in `<dir>`. The first build downloads Node and the npm packages. Done when both commands exit 0. On a failure, show the error and stop.
 5. **Report** what was added:
    - the module `inbound-http-json-vm`, wired into the parent and `app-server`
+   - Bulma 1.0.4, vendored under `META-INF/resources/css/bulma/1.0.4/`
    - the guestbook at `/`: a list and a sign form, `POST /example/guests` answering 204 + `HX-Trigger` or the 400 form envelope
    - `ExampleUiTest`, the `.gitignore` entries, the README link
    - the dev loop (step 4's two commands)
