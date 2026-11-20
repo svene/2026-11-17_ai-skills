@@ -1,0 +1,5 @@
+# An existing Triptych project with a Kafka consumer (topic "orders") that builds the domain value with its
+# constructor, never validates, and has no dead-letter topic.
+bare-project --group-id org.acme --artifact-id shop
+triptych
+./add-inbound-kafka.sh

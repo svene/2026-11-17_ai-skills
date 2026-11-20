@@ -1,0 +1,3 @@
+# A skill step, then a script of the case itself.
+harness-probe --name world
+./add-farewell.sh --name moon

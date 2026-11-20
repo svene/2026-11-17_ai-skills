@@ -1,0 +1,4 @@
+# A fresh Triptych project, then the validation technique on its example slice.
+bare-project --group-id org.acme --artifact-id demo-app
+triptych
+validation

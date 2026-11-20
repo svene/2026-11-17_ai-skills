@@ -1,0 +1,5 @@
+# Dev Services starts the Kafka broker for the tests.
+REQUIRES=docker
+MODEL=sonnet
+MAX_BUDGET_USD=2.50
+MAX_TURNS=70

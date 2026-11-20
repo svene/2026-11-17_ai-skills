@@ -1,0 +1,5 @@
+# A project that used the technique, then drifted: ValidationArchitectureTest was deleted (fixture-remove), and
+# an inbound class now builds an Example with its constructor (fixture).
+bare-project --group-id org.acme --artifact-id shop
+triptych
+validation

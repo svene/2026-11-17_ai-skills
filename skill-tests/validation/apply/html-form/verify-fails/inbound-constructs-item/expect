@@ -1,0 +1,3 @@
+# The parse rule fails, naming the planted shortcut.
+inbound_adapters_construct_domain_values_only_via_parse
+ItemShortcut

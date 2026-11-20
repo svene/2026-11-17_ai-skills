@@ -1,0 +1,2 @@
+# The rule the validation script added; the conformance check must bring it back.
+app-server/src/test/java/org/acme/shop/devsupport/ValidationArchitectureTest.java

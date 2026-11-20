@@ -1,0 +1,1 @@
+- [Input validation](https://github.com/svene/2026-07-26_quarkus-hexagon-demo-mm-per-tech/blob/b2f849396eb60a3aae38918c7fab3033c93bb1d9/docs/architecture/validation.md): "parse, don't validate"; `ValidationArchitectureTest` in `app-server` keeps inbound adapters on `parse(...)`
