@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Structure of a fresh project with htmx-hono; mvn verify (already run) proves codegen, tsc, the bundle and the
-# envelopes, the e2e suite (already run) the browser side.
+# envelopes. The browser side is tested by the playwright skill's fresh/htmx-hono case.
 set -euo pipefail
 
 p=org/acme/demoapp m=inbound-http-json-vm

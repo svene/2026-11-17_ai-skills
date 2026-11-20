@@ -1,0 +1,1 @@
+- [Playwright end-to-end tests](https://github.com/svene/2026-09-03_hypermedia-quarkus-browser-hono/blob/5b8da7f0d12eb125fd07c5138453c7b896d09a5a/development.md#end-to-end-tests): `e2e-playwright/` is its own npm project; `npm test` there builds and starts the app, then drives Chromium against it (`E2E_SERVER=dev` for `quarkus:dev`)

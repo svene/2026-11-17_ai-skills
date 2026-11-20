@@ -1,0 +1,2 @@
+# npm test in e2e-playwright needs a system Node.
+REQUIRES="npm npx"
