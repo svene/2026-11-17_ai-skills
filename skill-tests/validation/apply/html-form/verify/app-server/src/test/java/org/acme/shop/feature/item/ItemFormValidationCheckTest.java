@@ -23,7 +23,7 @@ class ItemFormValidationCheckTest {
     @Test
     void valid_post_adds_the_item() {
         given().formParam("name", "check-valid").formParam("quantity", "2")
-            .when().post("/vm/items")
+            .when().post("/item/items")
             .then().statusCode(204);
         assertThat(itemHandler.items()).extracting(Item::name).contains("check-valid");
     }
@@ -31,7 +31,7 @@ class ItemFormValidationCheckTest {
     @Test
     void non_numeric_quantity_is_400_with_the_form_and_its_error() {
         given().formParam("name", "check-text").formParam("quantity", "abc")
-            .when().post("/vm/items")
+            .when().post("/item/items")
             .then().statusCode(400)
             .body("route", is("ItemForm"))
             .body("vm.name", is("check-text"))
@@ -43,10 +43,10 @@ class ItemFormValidationCheckTest {
     @Test
     void blank_name_and_zero_quantity_are_400_with_errors() {
         given().formParam("name", " ").formParam("quantity", "1")
-            .when().post("/vm/items")
+            .when().post("/item/items")
             .then().statusCode(400).body("vm.errors.name", not(emptyOrNullString()));
         given().formParam("name", "check-zero").formParam("quantity", "0")
-            .when().post("/vm/items")
+            .when().post("/item/items")
             .then().statusCode(400).body("vm.errors.quantity", not(emptyOrNullString()));
     }
 }

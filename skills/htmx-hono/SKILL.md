@@ -17,7 +17,7 @@ Everything lives in one module, **`inbound-http-json-vm`** (JSON view models for
 
 **Writes: action resources.** Mutations live in a feature's `*ActionResource`: a JAX-RS resource with a literal `@Path`, whose methods return `Response` (blocking; `Uni<T>` and `void` are unsupported).
 - Success: **204** plus `HX-Trigger: <UiEventName>`. The affected components listen with `hx-trigger="${eventName("…")} from:body"` and re-fetch their route.
-- Invalid input: **400** with the form's own envelope, `{route: <FormRoute>, vm: {…submitted values…, errors: {field: message}}}`. One template renders both states, and the form re-renders into the same target. A form VM always carries `errors` (empty on GET); in TS it is refined to `Partial<Record<keyof XxxVM, string>>`. The validation skill replaces the inline check with `parse()`.
+- Invalid input: **400** with the form's own envelope, `{route: <FormRoute>, vm: {…submitted values…, errors: {field: message}}}`. One template renders both states, and the form re-renders into the same target. A form VM always carries `errors` (empty on GET); in TS it is refined to `Partial<Record<keyof XxxVM, string>>`. The guestbook checks inline; a real feature's form uses `parse()` from the validation skill.
 - Navigation: `HX-Redirect`. Header names are in `HtmxHeaders`.
 
 **View models** are records named `*VM`, next to their Receiver in `feature.<x>`.

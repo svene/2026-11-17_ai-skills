@@ -30,7 +30,8 @@ public class ExampleActionResource {
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response sign(@FormParam("name") String name) {
-		// The validation skill replaces this check with parse() on a domain value.
+		// A demo check on a plain String. A real feature's form parses its input into a domain value with parse(),
+		// per the validation skill.
 		if (name == null || name.isBlank()) {
 			var form = new ExampleSignFormVM(name == null ? "" : name, Map.of("name", "must not be blank"));
 			return Response.status(Response.Status.BAD_REQUEST)

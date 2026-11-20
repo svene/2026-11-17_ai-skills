@@ -16,7 +16,7 @@ The module references below give the extensions, a minimal adapter and the confi
 | `outbound-httpclient` | [modules/outbound-httpclient.md](modules/outbound-httpclient.md) |
 | `outbound-kafka` | [modules/outbound-kafka.md](modules/outbound-kafka.md) |
 
-`inbound-http-json-vm` belongs to the htmx skill, which creates it. For any other technology, follow the same steps and choose the Quarkus extension yourself.
+`inbound-http-json-vm` belongs to the htmx-hono skill, which creates it. For any other technology, follow the same steps and choose the Quarkus extension yourself.
 
 ## Steps
 
