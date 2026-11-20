@@ -48,6 +48,18 @@
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-reactive-routes</artifactId>
     </dependency>
+    <!-- Unit tests for logic beyond translation (UiRouteReceiverUnitTest): plain JUnit, no Quarkus boot.
+         Receivers and ActionResources are tested by @QuarkusTests in app-server. -->
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.assertj</groupId>
+      <artifactId>assertj-core</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>

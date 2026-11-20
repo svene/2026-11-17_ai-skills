@@ -18,7 +18,7 @@ Arguments: `$ARGUMENTS`
 | `core` | the hexagon: domain, `*Handler`s, `*SPI`s | no adapter module |
 | `inbound-<tech>` | `*Receiver`s for one inbound technology (e.g. `inbound-kafka`) | `core` |
 | `outbound-<tech>` | `*Service`s for one outbound technology (e.g. `outbound-postgres`) | `core` |
-| `app-server` | assembly only: no main sources, the boot test, the ArchUnit rules | `core` and every adapter module |
+| `app-server` | assembly only: no main sources; the boot test, the adapters' `@QuarkusTest`s, the ArchUnit rules | `core` and every adapter module |
 
 A Technology module is added when a technology is added, never when a feature is added.
 
@@ -43,6 +43,16 @@ A Receiver calls a Handler. A Handler calls SPIs and `cross` code, never another
 Coming from the single-module variant, rename Primary Adapter → `*Receiver`, `*Port` → drop it and use the Handler, Secondary Port → `*SPI`. `*Handler` and `*Service` keep their names.
 
 **Rules.** `app-server/src/test/java/<package>/devsupport/` holds `TriptychArchitecture`, `TriptychArchitectureConfig` and `ArchitectureTest`, owned by the project once copied. They check that feature slices are independent, that SPIs are public interfaces, that every role class sits under `feature` or `cross`, and that no `inbound-*` class depends on an SPI. `archunit.properties` sets `archRule.failOnEmptyShould=true`, so a scan that finds nothing fails too. The module graph enforces the rest: `core` cannot see adapters, and adapters cannot see each other.
+
+**Tests.** Where a test goes depends on what it checks:
+
+| Code | Test | Module |
+|---|---|---|
+| domain, Handlers | plain JUnit + AssertJ | `core` |
+| Receivers and Services | `@QuarkusTest` against the booted app (RestAssured for HTTP, Dev Services for Kafka or a database) | `app-server` |
+| logic in an adapter module beyond translating a call (a view model's calculation, error classification, a startup check) | plain JUnit + AssertJ, no Quarkus boot | that adapter module |
+
+Do not unit-test a Receiver or Service by calling its methods. What can break in one lives in the framework: paths, the JSON shape, status codes, headers, CDI wiring. Only the booted app shows that, and only `app-server` boots, because the SPI implementations and the configuration are there. When a Receiver grows real logic, move it into a class of its own and unit-test that class in the module, adding `org.junit.jupiter:junit-jupiter` and `org.assertj:assertj-core` (test scope; the Quarkus BOM manages the versions) to the module's pom.
 
 ## Inputs
 
