@@ -20,6 +20,8 @@ The module references below give the extensions, a minimal adapter and the confi
 
 ## Steps
 
+With `adapter=none` in the arguments (the Setup guide, when the validation skill follows and writes the example consumer itself), do steps 2, 3, 7 and 8 only: the module, wired, with its extensions and no adapter.
+
 1. **Confirm** (skip `from: setup-guide`). Show `<module> in <dir>: extensions <…>, example <Name>Receiver|Service in feature.<x>` and wait for a yes. Pick the feature it serves with the user. On a fresh project that is `feature.example`.
 2. **Module pom.** Create `<module>/pom.xml` like `core/pom.xml`: the same parent, `<artifactId><module></artifactId>`, a dependency on `core` (`${project.groupId}`, version from dependency management), and the extensions from the module reference.
 3. **Wire it.** Add these entries in the parent pom, each placed next to its siblings:

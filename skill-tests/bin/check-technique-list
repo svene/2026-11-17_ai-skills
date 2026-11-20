@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+# check-technique-list: the Setup guide knows Techniques from a fixed table (its "## Techniques" section).
+# Fails when a skill in skills/ (other than bare-project and setup-guide) is missing from that table's
+# Skill column, or when the table names a skill that does not exist. No LLM; bin/run calls it.
+# Env override (used by the self-test): PLUGIN_DIR.
+set -uo pipefail
+here=$(cd "$(dirname "$0")/.." && pwd)
+PLUGIN_DIR=${PLUGIN_DIR:-$(cd "$here/.." && pwd)}
+guide="$PLUGIN_DIR/skills/setup-guide/SKILL.md"
+[ -f "$guide" ] || { echo "SKIP setup-guide technique-list (no setup-guide skill)"; exit 0; }
+
+# The Skill column (4th field) of the table rows in "## Techniques", without backticks.
+listed=$(awk '/^## /{in_t=($0=="## Techniques")} in_t && /^\|/' "$guide" \
+  | awk -F'|' 'NR>2{gsub(/[ `]/,"",$4); if($4!="") print $4}' | sort -u)
+bad=0
+for d in "$PLUGIN_DIR"/skills/*/; do
+  s=$(basename "$d")
+  case $s in bare-project|setup-guide) continue ;; esac
+  grep -qx "$s" <<<"$listed" || { echo "missing from the Setup guide's Techniques table: $s"; bad=1; }
+done
+for s in $listed; do
+  [ -d "$PLUGIN_DIR/skills/$s" ] || { echo "Setup guide's Techniques table names an unknown skill: $s"; bad=1; }
+done
+if [ $bad -eq 0 ]; then echo "PASS setup-guide technique-list"; else echo "FAIL setup-guide technique-list"; fi
+exit $bad

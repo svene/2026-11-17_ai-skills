@@ -86,6 +86,9 @@ setup() {
       rm -rf "${project:?}/$line"
     done <"$c/fixture-remove"
   fi
+  # Fixture type `none`: with no setup and no fixture, the project stays an empty directory (no git repo),
+  # for skills that create the project themselves (the Setup guide).
+  [ -f "$c/setup" ] || [ -d "$c/fixture" ] || return 0
   commit_all "skilltest: setup"
 }
 
@@ -254,6 +257,10 @@ if [ "${pos[1]:-}" = verify ]; then
 fi
 
 failed=0
+# The Setup guide's Techniques table must list every Technique skill (no LLM).
+if [ ${#pos[@]} -eq 0 ] || [ "${pos[0]}" = setup-guide ]; then
+  PLUGIN_DIR="$PLUGIN_DIR" "$here/bin/check-technique-list" || failed=1
+fi
 if [ ${#pos[@]} -eq 0 ]; then
   [ -n "$(skills_with_tests)" ] || { echo "no skill tests found in $TESTS_DIR"; exit 0; }
   kinds=(fresh); [ $all_apply -eq 1 ] && kinds+=(apply)
