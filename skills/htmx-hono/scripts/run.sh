@@ -70,7 +70,7 @@ for f in "$templates"/infra/htmlrender/*; do put "infra/htmlrender/${f##*/}" "$j
 for f in "$templates"/infra/devreload/*; do put "infra/devreload/${f##*/}" "$java/cross/devreload/${f##*/}"; done
 put infra/resources/index.html "$res/index.html"
 put infra/resources/js/dev-reload.js "$res/js/dev-reload.js"
-put infra/resources/js/htmx.js "$res/js/htmx/4.0.0/htmx.js"
+put infra/resources/js/htmx.js "$res/js/htmx/4.0.2/htmx.js"
 put infra/resources/css/bulma.min.css "$res/css/bulma/1.0.4/bulma.min.css"
 
 # The example slice
