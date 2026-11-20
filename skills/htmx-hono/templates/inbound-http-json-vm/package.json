@@ -1,0 +1,17 @@
+{
+  "name": "inbound-http-json-vm",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "build": "esbuild src/main/java/@PACKAGE_PATH@/cross/htmlrender/hx-hono.ts --bundle --platform=browser --format=iife --minify --sourcemap --outfile=target/classes/META-INF/resources/js/hono/hx-hono.js",
+    "watch": "esbuild src/main/java/@PACKAGE_PATH@/cross/htmlrender/hx-hono.ts --bundle --platform=browser --format=iife --sourcemap --outfile=target/classes/META-INF/resources/js/hono/hx-hono.js --watch=forever"
+  },
+  "dependencies": {
+    "hono": "4.13.19"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2",
+    "typescript": "7.0.2"
+  }
+}

@@ -1,0 +1,3 @@
+# tsc runs in mvn verify and rejects the planted event name.
+TS2345
+NoteAddedd

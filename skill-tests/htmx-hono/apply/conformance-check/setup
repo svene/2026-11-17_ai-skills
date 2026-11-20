@@ -1,0 +1,5 @@
+# A project that used the technique, then drifted (fixture): the sign form posts to a literal URL, the guest list's
+# clear button uses hx-put on a @DELETE method, and that method returns void.
+bare-project --group-id org.acme --artifact-id shop
+triptych
+htmx-hono

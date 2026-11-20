@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>@GROUP_ID@</groupId>
+    <artifactId>@ARTIFACT_ID@</artifactId>
+    <version>@VERSION@</version>
+  </parent>
+
+  <artifactId>inbound-http-json-vm</artifactId>
+  <packaging>jar</packaging>
+
+  <name>inbound-http-json-vm</name>
+  <description>Inbound adapter: {route, vm} JSON envelopes for the htmx frontend, whose Hono templates render them in the browser.</description>
+
+  <properties>
+    <!-- Java is the source of truth for the view models, route and event names, and mutation URLs; the TS side is
+         generated from it (process-classes), type-checked (tsc noEmit) and bundled (esbuild), so a mismatch
+         breaks mvn verify. -->
+    <htmlrender.dir>${project.basedir}/src/main/java/@PACKAGE_PATH@/cross/htmlrender</htmlrender.dir>
+    <typescript-generator.version>4.2.1</typescript-generator.version>
+    <frontend-maven-plugin.version>2.0.2</frontend-maven-plugin.version>
+    <node.version>v26.13.1</node.version>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>@GROUP_ID@</groupId>
+      <artifactId>core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-rest</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-rest-jackson</artifactId>
+    </dependency>
+    <!-- Dev reload only (cross.devreload, @IfBuildProfile("dev")) -->
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-scheduler</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-reactive-routes</artifactId>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>cz.habarta.typescript-generator</groupId>
+        <artifactId>typescript-generator-maven-plugin</artifactId>
+        <version>${typescript-generator.version}</version>
+        <executions>
+          <!-- (a) View models (records named *VM) and the route and event name enums -> vm-types.d.ts -->
+          <execution>
+            <id>generate-vm-types</id>
+            <phase>process-classes</phase>
+            <goals>
+              <goal>generate</goal>
+            </goals>
+            <configuration>
+              <jsonLibrary>jackson2</jsonLibrary>
+              <classPatterns>
+                <pattern>@PACKAGE@.**.*VM</pattern>
+              </classPatterns>
+              <classes>
+                <class>@PACKAGE@.cross.htmlrender.UiRouteName</class>
+                <class>@PACKAGE@.cross.htmlrender.UiEventName</class>
+              </classes>
+              <outputFile>${htmlrender.dir}/generated/types/vm-types.d.ts</outputFile>
+              <outputFileType>declarationFile</outputFileType>
+              <outputKind>module</outputKind>
+              <mapClasses>asInterfaces</mapClasses>
+              <mapEnum>asUnion</mapEnum>
+            </configuration>
+          </execution>
+          <!-- (b) Mutation URLs: one URL-building client class per *ActionResource -> web-api.ts (see api.ts) -->
+          <execution>
+            <id>generate-web-api</id>
+            <phase>process-classes</phase>
+            <goals>
+              <goal>generate</goal>
+            </goals>
+            <configuration>
+              <jsonLibrary>jackson2</jsonLibrary>
+              <classPatterns>
+                <pattern>@PACKAGE@.**.*ActionResource</pattern>
+              </classPatterns>
+              <outputFile>${htmlrender.dir}/generated/types/web-api.ts</outputFile>
+              <outputFileType>implementationFile</outputFileType>
+              <outputKind>module</outputKind>
+              <generateJaxrsApplicationClient>true</generateJaxrsApplicationClient>
+              <restNamespacing>perResource</restNamespacing>
+              <restResponseType>string</restResponseType>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>com.github.eirslett</groupId>
+        <artifactId>frontend-maven-plugin</artifactId>
+        <version>${frontend-maven-plugin.version}</version>
+        <configuration>
+          <nodeVersion>${node.version}</nodeVersion>
+          <installDirectory>${project.basedir}/node</installDirectory>
+        </configuration>
+        <executions>
+          <execution>
+            <id>install-node-and-npm</id>
+            <phase>initialize</phase>
+            <goals>
+              <goal>install-node-and-npm</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>npm-ci</id>
+            <phase>initialize</phase>
+            <goals>
+              <goal>npm</goal>
+            </goals>
+            <configuration>
+              <!-- No install scripts: esbuild ships its binary as an optional dependency and needs none --><arguments>ci --no-audit --no-fund --ignore-scripts</arguments>
+            </configuration>
+          </execution>
+          <!-- Declared after the typescript-generator executions, so they run after codegen in process-classes -->
+          <execution>
+            <id>typecheck</id>
+            <phase>process-classes</phase>
+            <goals>
+              <goal>npm</goal>
+            </goals>
+            <configuration>
+              <arguments>run typecheck</arguments>
+            </configuration>
+          </execution>
+          <execution>
+            <id>bundle</id>
+            <phase>process-classes</phase>
+            <goals>
+              <goal>npm</goal>
+            </goals>
+            <configuration>
+              <arguments>run build</arguments>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>

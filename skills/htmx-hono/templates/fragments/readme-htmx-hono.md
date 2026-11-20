@@ -1,0 +1,1 @@
+- [htmx + Hono frontend](https://github.com/svene/2026-09-03_hypermedia-quarkus-browser-hono/blob/5b8da7f0d12eb125fd07c5138453c7b896d09a5a/architecture.md): `inbound-http-json-vm` answers `{route, vm}` envelopes; Hono templates render them in the browser; Java view models, route names and mutation URLs are generated into TypeScript, so a mismatch breaks `mvn verify`

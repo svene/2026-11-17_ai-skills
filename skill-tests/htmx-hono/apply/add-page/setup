@@ -1,0 +1,4 @@
+# A fresh Triptych project with the htmx + Hono frontend and its guestbook example.
+bare-project --group-id org.acme --artifact-id notes
+triptych
+htmx-hono
