@@ -1,2 +1,0 @@
-# The e2e suite (verify/e2e) needs a system Node; the module itself brings its own via frontend-maven-plugin.
-REQUIRES="npm npx"

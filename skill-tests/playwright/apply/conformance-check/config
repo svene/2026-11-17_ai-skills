@@ -1,0 +1,5 @@
+# npm test in e2e-playwright needs a system Node.
+REQUIRES="npm npx"
+MODEL=sonnet
+MAX_BUDGET_USD=2.00
+MAX_TURNS=60

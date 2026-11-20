@@ -1,0 +1,2 @@
+# The guest list no longer re-fetches on ExampleGuestSigned: only the browser test can see that.
+signing re-fetches the list

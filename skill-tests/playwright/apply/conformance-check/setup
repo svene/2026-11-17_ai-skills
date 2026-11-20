@@ -1,0 +1,5 @@
+# Playwright first, htmx-hono later: the guestbook has no spec. Then drift (fixture): retries on CI.
+bare-project --group-id org.acme --artifact-id demo-app
+triptych
+playwright
+htmx-hono

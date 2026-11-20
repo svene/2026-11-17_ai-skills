@@ -1,0 +1,1 @@
+Use the playwright skill to give this project end-to-end tests. The smoke path is `GET /items`. Then add a spec for the item API (`org.acme.shop.feature.item`): an item added with `POST /items` (JSON `{"name": …, "quantity": …}`) is listed by `GET /items`, and a blank name is a 400. I approve every stage: apply them all without asking. Do not commit.
