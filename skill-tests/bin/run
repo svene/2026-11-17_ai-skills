@@ -43,8 +43,9 @@ export GIT_COMMITTER_NAME=skilltest GIT_COMMITTER_EMAIL=skilltest@localhost
 # ---------- helpers (operate on globals: run, log, project, tdir) ----------
 
 # copy_tree <src> <dst>: copy a directory's contents, leaving out runner control files.
+# -m: the copies get fresh mtimes, so an incremental build (target/ is kept) sees them as changed.
 copy_tree() {
-  (cd "$1" && tar cf - --exclude=./check.sh --exclude=./expect .) | (cd "$2" && tar xf -)
+  (cd "$1" && tar cf - --exclude=./check.sh --exclude=./expect .) | (cd "$2" && tar xmf -)
 }
 
 # commit_all <message>: snapshot the project so later steps can be reset to it.

@@ -1,0 +1,4 @@
+# An existing Triptych project: besides triptych's example slice, an item slice with a JSON API (POST /items) and
+# no UI.
+bare-project --group-id org.acme --artifact-id shop
+triptych

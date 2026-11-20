@@ -1,0 +1,3 @@
+# tsc runs in mvn verify and rejects the planted route name (TS2820 when it can suggest the right one).
+TS2(322|820)
+ItemPag

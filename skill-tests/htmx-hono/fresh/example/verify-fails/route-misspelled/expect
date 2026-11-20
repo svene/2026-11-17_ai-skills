@@ -1,0 +1,3 @@
+# routes satisfies Record<UiRouteName, RouteDefinition>: tsc names the misspelled key.
+TS2561
+ExampleGuestLst

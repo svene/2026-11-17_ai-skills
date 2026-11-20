@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>@ARTIFACT_ID@</title>
+  <!-- htmx, then the hono extension bundle: in this order and not deferred, so the extension is registered before
+       htmx processes the page (see hx-hono.ts). -->
+  <script src="/js/htmx/4.0.0/htmx.js"></script>
+  <script src="/js/hono/hx-hono.js"></script>
+  <script src="/js/dev-reload.js"></script>
+</head>
+<!-- hx-ext documents the extension; htmx 4 extensions apply to the whole page anyway -->
+<body hx-ext="hono">
+  <div id="error-banner" role="alert" hidden></div>
+  <main id="app" hx-get="/uiroute/ExamplePage" hx-trigger="load"></main>
+</body>
+</html>

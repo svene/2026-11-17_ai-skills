@@ -1,0 +1,5 @@
+
+# inbound-http-json-vm (htmx-hono): the Node install of frontend-maven-plugin, npm packages, generated TS types
+/inbound-http-json-vm/node/
+node_modules/
+**/cross/htmlrender/generated/
