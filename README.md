@@ -2,12 +2,50 @@
 
 My own Claude Code skills for software development. The repo is one Claude Code plugin, `seswdevskills`, published through a one-entry local marketplace, `svenemarket`. The skills target Quarkus multi-module projects. The **Setup guide** starts a new project: it runs the **Bare project** skill, then applies the **Technique** skills (triptych architecture, validation, htmx + Hono, Playwright). Terms are defined in [GLOSSARY.md](GLOSSARY.md).
 
+## Using the skills
+
+Invoke a skill as `/seswdevskills:<skill>`, or simply ask for what you want ("start a new project", "add Playwright tests"), and Claude picks the matching skill. Each skill shows what it will do and waits for your yes before writing anything. When it has finished, `./mvnw verify` is green.
+
+### Starting a new project
+
+In an empty directory, run **`/seswdevskills:setup-guide`**. It asks every question at once: group ID, artifact ID, package, and yes or no for Kafka, validation, htmx + Hono and Playwright. It shows the plan once and, after your yes, runs the chain with one git commit per step:
+
+```text
+bare-project → triptych → Kafka module → validation → htmx-hono → playwright
+               (always)    (each optional, in this order)
+```
+
+The order matters for the examples. Validation's example also covers a Kafka consumer when `inbound-kafka` already exists. Playwright writes a spec for htmx + Hono's guestbook page when that page already exists. If a step fails, the guide stops, leaves that step uncommitted and names the skills still to run by hand. Anything you decline can be added later with its own skill.
+
+You can also run the same chain by hand, one skill at a time, in the order above. Use `/seswdevskills:bare-project` first, then `/seswdevskills:triptych`, then the Technique skills. In that case you make the commits yourself.
+
+### Adding to an existing project
+
+Apply **triptych first**: every other Technique skill refuses a project that does not use the Triptych architecture yet. After that, add validation, htmx-hono and playwright in any order, and each only when you need it. Each skill detects what the project already has and picks its mode:
+
+| Skill | Fresh project (from bare-project / triptych) | Existing project | Already applied |
+|---|---|---|---|
+| `bare-project` | creates parent + `app-server` (no Techniques) | refuses a non-empty directory | n/a |
+| `triptych` | adds `core`, `inbound-http-jsonapi`, an example feature and ArchUnit rules | migrates a multi-module project (single-module projects are not supported) | conformance check; on request also adds a Technology module (e.g. `inbound-kafka`) or a feature slice |
+| `validation` | "parse, don't validate" helper, an example and an ArchUnit rule (plus a Kafka consumer if `inbound-kafka` exists) | applies it to your features in stages | conformance check |
+| `htmx-hono` | `inbound-http-json-vm` module with a guestbook example page | adds the module to your project in stages | conformance check; on request adds a page or component |
+| `playwright` | `e2e-playwright/` with an example spec (plus a guestbook spec after htmx-hono) | adds `e2e-playwright/` with a smoke spec, or aligns a Playwright setup you already have | conformance check; on request writes a spec for a page or flow |
+
+A **conformance check** means running the skill on a project that already uses its Technique. It reports where the project deviates from the Technique.
+
+Prerequisites:
+- Java 25 (or 21).
+- Docker, when the project uses Kafka, because the tests use a Dev Services broker.
+- A system Node with `npm`, for Playwright only. htmx-hono's build downloads its own Node through Maven.
+
+Each skill's `SKILL.md` describes the Technique in detail.
+
 ## Layout
 
 - `.claude-plugin/plugin.json`: the plugin manifest. It has no `version`; the commit SHA is the version.
 - `.claude-plugin/marketplace.json`: the `svenemarket` marketplace, with one entry (`source: "./"`).
 - `skills/<name>/SKILL.md`: one self-contained folder per skill. Bundled scripts and templates are referenced via `${CLAUDE_SKILL_DIR}`.
-- `skill-tests/`: the skill tests (see below).
+- `skill-tests/`: the skill tests; [skill-tests/README.md](skill-tests/README.md) explains how to run them.
 
 ## Install (personal, one machine)
 
