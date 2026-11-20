@@ -14,6 +14,8 @@ bin/run <skill> verify <project-dir> [<case>]  # judge a human's run exactly lik
 
 Options: `--model <alias>` overrides the model, `--keep` keeps the run dir even on a pass.
 
+A run of every test, and any run of `setup-guide`, first runs `bin/check-technique-list` (no LLM): it fails when a skill in `skills/` is missing from the Setup guide's Techniques table.
+
 Each case prints one line, `PASS|FAIL|SKIP <skill> <kind>/<case> total_cost_usd=… num_turns=… denials=…`, and the exit code is non-zero if any case failed. Every run happens in a fresh `mktemp -d` outside the repo. It is deleted on a pass and kept on a failure or with `--keep`, and holds `log.txt`, the `claude` transcript (`claude.jsonl`) and the final reply (`result.txt`).
 
 ## Two kinds of test
@@ -35,7 +37,7 @@ skill-tests/
 
 | File | Meaning |
 |---|---|
-| `setup` | One step per line: `<skill>[/<script>] [args…]`. Runs `skills/<skill>/scripts/<script>` (default `run.sh`) as `<script> <project-dir> [args…]`. A step `./<script> [args…]` runs an executable script of the case directory instead, for setup no skill provides (e.g. a Technology module the skill under test needs). `#` starts a comment. With no `setup`, the project starts empty. |
+| `setup` | One step per line: `<skill>[/<script>] [args…]`. Runs `skills/<skill>/scripts/<script>` (default `run.sh`) as `<script> <project-dir> [args…]`. A step `./<script> [args…]` runs an executable script of the case directory instead, for setup no skill provides (e.g. a Technology module the skill under test needs). `#` starts a comment. With neither `setup` nor `fixture/`, the project is an empty directory without a git repo (fixture type `none`), for a skill that creates the project itself. |
 | `fixture/` | Copied over the project after `setup`, e.g. a REST resource that makes a Fixture project "existing". The project is then committed. |
 | `fixture-remove` | Paths, one per line and relative to the project, deleted after the `fixture/` overlay, e.g. to take away what a setup script added. A missing path fails the setup. `#` starts a comment. |
 | `config` | Shell variables: `MODEL` (default `sonnet`), `MAX_BUDGET_USD` (`0.50`), `MAX_TURNS` (`30`), `REQUIRES` (space-separated commands; `docker` must also be running). If a requirement is missing, the case is skipped. |

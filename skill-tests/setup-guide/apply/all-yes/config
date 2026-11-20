@@ -1,0 +1,5 @@
+# Fixture type none: no setup and no fixture/, so the project is an empty directory the guide fills.
+# The whole chain runs: Kafka's Dev Services tests need Docker, Playwright needs npm.
+REQUIRES="docker npm npx"
+MAX_BUDGET_USD=3.00
+MAX_TURNS=150

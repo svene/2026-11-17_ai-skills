@@ -51,7 +51,7 @@ Coming from the single-module variant, rename Primary Adapter → `*Receiver`, `
 | project directory | the current directory |
 | root package | the package of `app-server`'s `AppServerBootTest`, or else the common prefix of the main sources |
 
-When the arguments contain a `from: setup-guide; …` line, take `dir=` and `package=` from it; `fresh: true` there means the project is fresh, so go straight to the fresh branch. That caller has already confirmed, so skip every **Confirm** step below, and leave all commits to it.
+When the arguments contain a `from: setup-guide; …` line, take `dir=` and `package=` from it. With `module=<name>` there, add that Technology module (feature `example`); otherwise `fresh: true` means the project is fresh, so go straight to the fresh branch. That caller has already confirmed, so skip every **Confirm** step below, and leave all commits to it.
 
 ## Steps
 
