@@ -15,14 +15,25 @@ export const ExampleSignForm = (vm: ExampleSignFormVM): HtmlResult => {
 	const errors: Errors = vm.errors;
 	return html`
 		<div
+			class="box"
 			hx-get="${nameUrl("ExampleSignForm")}"
 			hx-trigger="${eventName("ExampleGuestSigned")} from:body"
 			hx-swap="outerHTML"
 		>
-			<form hx-post="${exampleApi.sign()}" hx-target="closest div" hx-swap="outerHTML">
-				<label>Name <input type="text" name="name" value="${vm.name}"></label>
-				<button type="submit">Sign</button>
-				${errors.name ? html`<p class="error">${errors.name}</p>` : ""}
+			<form hx-post="${exampleApi.sign()}" hx-target="closest div.box" hx-swap="outerHTML">
+				<div class="field">
+					<label class="label" for="example-sign-name">Name</label>
+					<div class="control">
+						<input id="example-sign-name" class="input ${errors.name ? "is-danger" : ""}" type="text" name="name"
+							value="${vm.name}">
+					</div>
+					${errors.name ? html`<p class="help is-danger">${errors.name}</p>` : ""}
+				</div>
+				<div class="field">
+					<div class="control">
+						<button type="submit" class="button is-primary">Sign</button>
+					</div>
+				</div>
 			</form>
 		</div>
 	`;

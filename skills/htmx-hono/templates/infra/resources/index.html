@@ -4,6 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>@ARTIFACT_ID@</title>
+  <!-- Bulma, vendored at a versioned path like htmx. Bulma 1 follows the OS dark mode; set data-theme="light" on
+       <html> to opt out. -->
+  <link rel="stylesheet" href="/css/bulma/1.0.4/bulma.min.css">
   <!-- htmx, then the hono extension bundle: in this order and not deferred, so the extension is registered before
        htmx processes the page (see hx-hono.ts). -->
   <script src="/js/htmx/4.0.0/htmx.js"></script>
@@ -12,7 +15,11 @@
 </head>
 <!-- hx-ext documents the extension; htmx 4 extensions apply to the whole page anyway -->
 <body hx-ext="hono">
-  <div id="error-banner" role="alert" hidden></div>
-  <main id="app" hx-get="/uiroute/ExamplePage" hx-trigger="load"></main>
+  <section class="section">
+    <div class="container">
+      <div id="error-banner" class="notification is-danger" role="alert" hidden></div>
+      <main id="app" hx-get="/uiroute/ExamplePage" hx-trigger="load"></main>
+    </div>
+  </section>
 </body>
 </html>

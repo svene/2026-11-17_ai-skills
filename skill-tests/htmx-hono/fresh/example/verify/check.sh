@@ -11,7 +11,7 @@ for f in $m/pom.xml $m/package.json $m/package-lock.json $m/tsconfig.json \
          $j/cross/htmlrender/generated/types/{vm-types.d.ts,web-api.ts} \
          $j/cross/devreload/{DevReloadSSE,JsBundleWatcher}.java \
          $j/feature/example/{ExampleUiReceiver,ExampleActionResource}.java \
-         $m/src/main/resources/META-INF/resources/{index.html,js/dev-reload.js,js/htmx/4.0.0/htmx.js} \
+         $m/src/main/resources/META-INF/resources/{index.html,js/dev-reload.js,js/htmx/4.0.0/htmx.js,css/bulma/1.0.4/bulma.min.css} \
          $m/target/classes/META-INF/resources/js/hono/hx-hono.js \
          core/src/main/java/$p/feature/example/ExampleGuestbookHandler.java \
          app-server/src/test/java/$p/feature/example/ExampleUiTest.java; do
@@ -23,6 +23,7 @@ awk '/<module>/{print $1}' pom.xml | tr '\n' ' ' | grep -q "<module>$m</module> 
 grep -q "<artifactId>$m</artifactId>" app-server/pom.xml || { echo "app-server does not depend on $m"; exit 1; }
 ! grep -rq '@[A-Z_]*@' pom.xml $m/pom.xml $m/package.json $m/src core/src app-server/src README.md \
   || { echo "unfilled placeholder"; exit 1; }
+grep -q 'href="/css/bulma/1.0.4/bulma.min.css"' $m/src/main/resources/META-INF/resources/index.html || { echo "index.html does not link Bulma"; exit 1; }
 grep -q '<title>demo-app</title>' $m/src/main/resources/META-INF/resources/index.html || { echo "index.html title not filled"; exit 1; }
 for g in "/$m/node/" "node_modules/" "**/cross/htmlrender/generated/"; do
   grep -qxF "$g" .gitignore || { echo ".gitignore lacks $g"; exit 1; }

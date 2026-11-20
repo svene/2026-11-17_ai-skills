@@ -22,6 +22,7 @@ Walk the checklist over `inbound-http-json-vm`, `index.html`, the module pom and
 | `String(` on a template result outside `render.ts` | minor |
 | `hx-hono.ts` no longer sets `Accept` in `htmx_config_request` | major |
 | 5xx missing from `htmx.config.noSwap`, or no `#error-banner` in `index.html` | major |
+| `index.html` does not link the vendored Bulma (`/css/bulma/<version>/bulma.min.css`), or loads it from a CDN, unless the project deliberately uses another CSS framework | minor |
 | `index.html` loads the bundle before htmx, or either `<script>` is `defer`red, `async` or a module | major |
 | a `cross.devreload` bean without `@IfBuildProfile("dev")` | major |
 | `tsc --noEmit` (the `typecheck` execution) missing from the module pom, or bound to a phase after `verify` | major |
