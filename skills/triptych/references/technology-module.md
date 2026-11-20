@@ -34,6 +34,6 @@ With `adapter=none` in the arguments (the Setup guide, when the validation skill
    - inbound: a `*Receiver` that injects the feature's Handler.
    - outbound: first the `*SPI` in `core`, then a `*Service` implementing it, then a Handler method that uses the SPI.
 5. **Config.** Add the reference's properties to `app-server/src/main/resources/application.properties`. Where Dev Services provides the backing service, leave its URL unset and say so in a comment.
-6. **Test.** Add a test in `app-server` that exercises the adapter the way the reference describes. Technologies backed by Dev Services need Docker; say so.
+6. **Test.** Add a `@QuarkusTest` in `app-server` that exercises the adapter the way the reference describes. Technologies backed by Dev Services need Docker; say so. Plain unit tests in the new module only for logic beyond translating the call (see **Tests** in SKILL.md).
 7. **Verify.** Run `./mvnw verify`. Done when it is green, including `ArchitectureTest`.
 8. **Report** the module, the wiring, the adapter, the config keys, and any Docker requirement.

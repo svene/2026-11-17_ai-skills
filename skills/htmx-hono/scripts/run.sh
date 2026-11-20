@@ -7,6 +7,7 @@
 #     htmx 4 and Bulma 1, index.html, the hono extension and the cross.htmlrender and cross.devreload infrastructure
 #   - the example slice's guestbook page: ExampleGuestbookHandler in core; view models, ExampleUiReceiver,
 #     ExampleActionResource and the Hono templates in inbound-http-json-vm; ExampleUiTest in app-server
+#   - UiRouteReceiverUnitTest in inbound-http-json-vm (the route table's startup checks)
 #   - the .gitignore entries and the README link
 # Without --existing, the project must be fresh: triptych's example slice and nothing else.
 # With --existing, any Triptych project without an inbound-http-json-vm module and without the example's classes.
@@ -65,8 +66,9 @@ rm -f "$frag"
 add_dep "$dir/app-server/pom.xml" '${project.groupId}' "$m"
 
 # Infrastructure
-java=$m/src/main/java/$pkg_path res=$m/src/main/resources/META-INF/resources
+java=$m/src/main/java/$pkg_path test=$m/src/test/java/$pkg_path res=$m/src/main/resources/META-INF/resources
 for f in "$templates"/infra/htmlrender/*; do put "infra/htmlrender/${f##*/}" "$java/cross/htmlrender/${f##*/}"; done
+for f in "$templates"/infra-test/htmlrender/*; do put "infra-test/htmlrender/${f##*/}" "$test/cross/htmlrender/${f##*/}"; done
 for f in "$templates"/infra/devreload/*; do put "infra/devreload/${f##*/}" "$java/cross/devreload/${f##*/}"; done
 put infra/resources/index.html "$res/index.html"
 put infra/resources/js/dev-reload.js "$res/js/dev-reload.js"
@@ -100,5 +102,5 @@ fi
 
 fill "$dir/$m" "$dir/core/src/main/java/$example" "$dir/app-server/src/test/java/$example"
 
-echo "htmx + Hono in $dir (package $package): module $m, guestbook example at / (ExamplePage), ExampleUiTest; nothing committed"
+echo "htmx + Hono in $dir (package $package): module $m, guestbook example at / (ExamplePage), UiRouteReceiverUnitTest, ExampleUiTest; nothing committed"
 echo "Dev loop: ./mvnw quarkus:dev -pl app-server -am, and in $m: npm run watch (node/ holds the Node install)"

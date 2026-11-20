@@ -26,4 +26,6 @@ A page is a component route like any other; `ExamplePage` is one that composes t
     - each route answers its envelope (`route` and the VM's fields)
     - each action answers 204 with its event (or the redirect)
     - each invalid input answers 400 with the form envelope and its `errors`
+
+    A view model that calculates something (totals, percentages, grouping) gets a plain JUnit test next to it in `inbound-http-json-vm`, as `UiRouteReceiverUnitTest` does for the route table. Receivers and ActionResources are tested only through `<X>UiTest`.
 11. **Verify.** Run `./mvnw verify`. Done when it is green, including `ArchitectureTest`, `tsc` and `<X>UiTest`. Report the routes, the actions with their answers, the events and the test. Browser tests belong to the Playwright skill.

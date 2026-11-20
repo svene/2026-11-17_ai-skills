@@ -80,7 +80,7 @@ When the arguments contain a `from: setup-guide; …` line, take `dir=` and `pac
    - the module `inbound-http-json-vm`, wired into the parent and `app-server`
    - Bulma 1.0.4, vendored under `META-INF/resources/css/bulma/1.0.4/`
    - the guestbook at `/`: a list and a sign form, `POST /example/guests` answering 204 + `HX-Trigger` or the 400 form envelope
-   - `ExampleUiTest`, the `.gitignore` entries, the README link
+   - `ExampleUiTest` in `app-server`, `UiRouteReceiverUnitTest` in the module (the route table's startup checks), the `.gitignore` entries, the README link
    - the dev loop (step 4's two commands)
 
    Mention that `feature.example` is the pattern to copy for a real page ([references/add-page.md](references/add-page.md)), and that browser tests belong to the Playwright skill.
