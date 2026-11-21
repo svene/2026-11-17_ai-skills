@@ -1,4 +1,5 @@
-# An existing Triptych project: besides triptych's example slice, an item slice with a JSON API (GET and POST /items)
-# and no UI.
+# An existing Triptych project with the htmx-hono frontend (Playwright's precondition): besides the example slice, an
+# item slice with a JSON API (GET and POST /items) and no page of its own.
 bare-project --group-id org.acme --artifact-id shop
 triptych
+htmx-hono

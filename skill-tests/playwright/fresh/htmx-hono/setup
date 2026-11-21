@@ -1,4 +1,4 @@
-# Fresh + htmx-hono + Playwright: the order of the Setup guide. The guestbook spec is written because index.html
+# Fresh + htmx-hono + Playwright: Playwright needs htmx-hono first. The guestbook spec is written because index.html
 # bootstraps /uiroute/ExamplePage.
 bare-project --group-id org.acme --artifact-id demo-app
 triptych

@@ -1,0 +1,6 @@
+# The Setup guide's order: a fresh Triptych project with htmx-hono's guestbook, then the validation technique.
+# Besides the JSON API example, validation turns the guestbook form into ExampleGuest.parse().
+bare-project --group-id org.acme --artifact-id demo-app
+triptych
+htmx-hono
+validation

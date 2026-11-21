@@ -7,6 +7,8 @@
 #   - inbound-http-jsonapi: POST /api/example -> 201, or 400 with [{field, message}]
 #   - inbound-kafka (only if the module exists): ExampleMessageReceiver on topic "example", invalid -> WARN
 #     and skip, unprocessable -> dead-letter queue "example-dlq"; plus a Dev Services test (needs Docker)
+#   - inbound-http-json-vm (only if htmx-hono's guestbook exists): ExampleGuest + ParsedExampleGuest in core,
+#     ExampleGuestbookHandler.sign(ExampleGuest), ExampleActionResource parses the form -> 204, or 400 with errors
 #   - app-server: ExampleReceiverTest covers 201 and 400
 # Never commits.
 #   --package  default: the package of app-server's AppServerBootTest
@@ -74,6 +76,21 @@ if [ -f "$dir/inbound-kafka/pom.xml" ]; then
   fill "$dir/inbound-kafka/src" "$props"
 fi
 
+guestbook=""
+if [ -f "$dir/inbound-http-json-vm/src/main/java/$example/ExampleActionResource.java" ]; then
+  [ -f "$dir/core/src/main/java/$example/ExampleGuestbookHandler.java" ] \
+    || die "ExampleActionResource without ExampleGuestbookHandler: not htmx-hono's guestbook"
+  [ ! -e "$dir/core/src/main/java/$example/ExampleGuest.java" ] || die "$example/ExampleGuest.java already exists"
+  guestbook=", guestbook form via ExampleGuest.parse"
+  put core/ExampleGuest.java "core/src/main/java/$example/ExampleGuest.java"
+  put core/ParsedExampleGuest.java "core/src/main/java/$example/ParsedExampleGuest.java"
+  put core/ExampleGuestbookHandler.java "core/src/main/java/$example/ExampleGuestbookHandler.java" force
+  put core/ExampleGuestTest.java "core/src/test/java/$example/ExampleGuestTest.java"
+  put inbound-http-json-vm/ExampleActionResource.java \
+    "inbound-http-json-vm/src/main/java/$example/ExampleActionResource.java" force
+  fill "$dir/inbound-http-json-vm/src/main/java/$example"
+fi
+
 fill "$dir/core/src" "$dir/inbound-http-jsonapi/src" "$dir/app-server/src"
 
-echo "Validation in $dir (package $package): infrastructure, Example + ParsedExample, POST /api/example$kafka, tests; nothing committed"
+echo "Validation in $dir (package $package): infrastructure, Example + ParsedExample, POST /api/example$kafka$guestbook, tests; nothing committed"
