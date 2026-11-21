@@ -1,11 +1,11 @@
 ---
 name: playwright
-description: Add Playwright browser tests to a Triptych Quarkus project: e2e-playwright/, a TypeScript @playwright/test project that builds and starts the app (packaged jar or quarkus:dev) and drives Chromium against it. Use when the Setup guide hands off to it, or the user asks for Playwright, end-to-end or browser tests, a new e2e spec, or a Playwright conformance check.
+description: Add Playwright browser tests to a Triptych Quarkus project with the htmx-hono frontend: e2e-playwright/, a TypeScript @playwright/test project that builds and starts the app (packaged jar or quarkus:dev) and drives Chromium against it. Use when the Setup guide hands off to it, or the user asks for Playwright, end-to-end or browser tests, a new e2e spec, or a Playwright conformance check.
 ---
 
 # Playwright end-to-end tests
 
-Gives a Triptych project browser tests that run against the real app. Unit and `@QuarkusTest` tests stay where they are; the Playwright suite owns everything only a browser can see: what htmx swaps, which request fires, what the user reads.
+Gives a Triptych project with the htmx-hono frontend browser tests that run against the real app. Unit and `@QuarkusTest` tests stay where they are; the Playwright suite owns everything only a browser can see: what htmx swaps, which request fires, what the user reads.
 
 Arguments: `$ARGUMENTS`
 
@@ -39,18 +39,18 @@ When the arguments contain a `from: setup-guide; …` line, take `dir=` from it,
 
 ## Steps
 
-1. **Check the precondition.** The project must be a Triptych project: `core`, at least one `inbound-*` module and `app-server`. Otherwise, stop and tell the user to apply the triptych skill first. Nothing is changed. (`run.sh` refuses such a project too.) The suite needs a system Node with `npm`; without one, stop and say so.
+1. **Check the precondition.** The project must be a Triptych project (`core`, at least one `inbound-*` module and `app-server`) with htmx-hono's `inbound-http-json-vm` module, since the suite tests that UI. Otherwise, stop and tell the user to apply the triptych skill, then the htmx-hono skill, first; whether validation was applied doesn't matter. Nothing is changed. (`run.sh` refuses such a project too.) The suite needs a system Node with `npm`; without one, stop and say so.
 2. **Detect the mode.** Done when the project matches exactly one row:
 
    | Shape | Mode |
    |---|---|
-   | only triptych's `feature.example` slice, no Playwright setup | **fresh**: step 3 |
+   | only the `feature.example` slice (triptych's, with htmx-hono's guestbook), no Playwright setup | **fresh**: step 3 |
    | other feature slices, no Playwright setup | **existing project**: follow [references/existing-project.md](references/existing-project.md) |
    | a Playwright setup outside `e2e-playwright/` (another folder, a JS config) | **existing project**, stage "align": [references/existing-project.md](references/existing-project.md) |
    | `e2e-playwright/` present, the user wants a spec for a page or flow | **add a spec**: follow [references/writing-specs.md](references/writing-specs.md) |
    | `e2e-playwright/` present, otherwise | **conformance check**: follow [references/conformance-check.md](references/conformance-check.md) |
 
-3. **Confirm** (fresh). Show one line and wait for a yes: `Playwright in <dir>: e2e-playwright/ (Chromium, @playwright/test 1.65.1), packaged jar on 8089 (E2E_SERVER=dev for quarkus:dev), example spec[ + guestbook spec]`. The guestbook spec is part of it when `index.html` bootstraps `/uiroute/ExamplePage` (the htmx-hono example).
+3. **Confirm** (fresh). Show one line and wait for a yes: `Playwright in <dir>: e2e-playwright/ (Chromium, @playwright/test 1.65.1), packaged jar on 8089 (E2E_SERVER=dev for quarkus:dev), guestbook spec`. Fresh needs `index.html` to bootstrap `/uiroute/ExamplePage` (htmx-hono's guestbook); without it, the project is an existing one.
 4. **Apply** (fresh). Run
    ```sh
    ${CLAUDE_SKILL_DIR}/scripts/run.sh <dir>
@@ -58,11 +58,11 @@ When the arguments contain a `from: setup-guide; …` line, take `dir=` from it,
    then, in `<dir>/e2e-playwright`: `npm ci`, `npm run install:browsers`, `npm test`. The first `npm test` builds the whole project before the browser starts. Done when all four exit 0. On a failure, show the error and stop.
 5. **Report** what was added:
    - `e2e-playwright/` and its files (the table above), and the README link
-   - the specs: `example.spec.ts` (`GET /api/example`) and, with htmx-hono, `guestbook.spec.ts`
+   - the spec: `guestbook.spec.ts` (htmx-hono's guestbook; readiness on `/uiroute/ExamplePage`)
    - how to run it: `npm test`, `npm run test:headed`, `E2E_SERVER=dev npm test`
 
-   Mention that the specs go with `feature.example` when it is deleted, and that a new page gets its spec through this skill (add a spec).
+   Mention that the spec goes with `feature.example` when it is deleted, and that a new page gets its spec through this skill (add a spec).
 
 ## Scripts
 
-- `scripts/run.sh <dir> [--existing --path <p>] [--dev-port <n>]`: writes `e2e-playwright/` and the README link. Without `--existing`, it refuses anything but a fresh Triptych project and writes the example specs. With it, it writes `smoke.spec.ts` for `--path`, which is also the readiness URL. `--dev-port` defaults to `quarkus.http.port` (`%dev.` first) in `app-server`'s `application.properties`, else 8080. It refuses a project that already has a Playwright setup. It never commits.
+- `scripts/run.sh <dir> [--existing --path <p>] [--dev-port <n>]`: writes `e2e-playwright/` and the README link. Without `--existing`, it refuses anything but a fresh Triptych + htmx-hono project and writes `guestbook.spec.ts`. With it, it writes `smoke.spec.ts` for `--path`, which is also the readiness URL. `--dev-port` defaults to `quarkus.http.port` (`%dev.` first) in `app-server`'s `application.properties`, else 8080. It refuses a project without `inbound-http-json-vm` or with a Playwright setup already. It never commits.

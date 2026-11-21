@@ -77,11 +77,11 @@ When the arguments contain a `from: setup-guide; …` line, take `dir=` and `pac
 
    | Shape | Mode |
    |---|---|
-   | only triptych's `feature.example` slice, no `ConstructorValidation` | **fresh**: step 3 |
+   | only the `feature.example` slice (triptych's, plus Kafka's consumer and htmx-hono's guestbook if present), no `ConstructorValidation` | **fresh**: step 3 |
    | other feature slices, no `ConstructorValidation` | **existing project**: follow [references/existing-project.md](references/existing-project.md) |
    | `ConstructorValidation` present | **conformance check**: follow [references/conformance-check.md](references/conformance-check.md) |
 
-3. **Confirm** (fresh). Show one line and wait for a yes: `Validation in <dir>: Example + ParsedExample, POST /api/example → 201/400[, Kafka consumer on "example"], ValidationArchitectureTest, package <p>`. Include the Kafka part only if `inbound-kafka/` exists.
+3. **Confirm** (fresh). Show one line and wait for a yes: `Validation in <dir>: Example + ParsedExample, POST /api/example → 201/400[, Kafka consumer on "example"][, guestbook form via ExampleGuest.parse], ValidationArchitectureTest, package <p>`. Include the Kafka part only if `inbound-kafka/` exists, and the guestbook part only if `inbound-http-json-vm/` exists (htmx-hono).
 4. **Apply** (fresh). Run
    ```sh
    ${CLAUDE_SKILL_DIR}/scripts/run.sh <dir> [--package <p>]
@@ -91,6 +91,7 @@ When the arguments contain a `from: setup-guide; …` line, take `dir=` and `pac
    - `Example` and `ParsedExample` in `core`
    - `POST /api/example`: 201 `{"message": "3 x widget"}`, or 400 with the violations
    - the Kafka consumer if there is one: invalid → WARN and skip; null or undeserializable → `example-dlq`
+   - the guestbook if there is one: `ExampleGuest` + `ParsedExampleGuest` in `core`, and `POST /action/example/sign` parses the name instead of checking it inline (still 400 with the form's `errors`)
    - the tests and the rule
    - the README link
 
@@ -98,7 +99,7 @@ When the arguments contain a `from: setup-guide; …` line, take `dir=` and `pac
 
 ## Scripts
 
-- `scripts/run.sh <dir> [--package <p>]`: the fresh mode only. It refuses any other shape. It runs `add-infrastructure.sh`, then rewrites `feature.example` from `${CLAUDE_SKILL_DIR}/templates/`.
+- `scripts/run.sh <dir> [--package <p>]`: the fresh mode only. It refuses any other shape. It runs `add-infrastructure.sh`, then rewrites `feature.example` from `${CLAUDE_SKILL_DIR}/templates/`, including Kafka's consumer and htmx-hono's guestbook when their modules exist.
 - `scripts/add-infrastructure.sh <dir> [--package <p>]`: `ConstructorValidation`, `quarkus-hibernate-validator` in `core`, `ValidationArchitectureTest` and `archunit.properties`, and the README link. It skips every piece that is already there and touches no endpoint. It is used by all three modes.
 - `templates/fragments/kafka-application.properties`: the channel configuration of a consumer with a dead-letter queue (`@PACKAGE@` is the root package).
 

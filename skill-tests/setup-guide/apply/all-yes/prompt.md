@@ -1,1 +1,1 @@
-Use the setup guide to start a new project in the current directory. My answers: group ID `org.acme`, artifact ID `shop`, the default root package. Kafka: yes. Validation: yes. htmx + Hono: yes. Playwright: yes. I confirm the plan: run the whole chain without asking.
+Use the setup guide to start a new project in the current directory. My answers: group ID `org.acme`, artifact ID `shop`, the default root package. Kafka: yes. htmx + Hono: yes. Validation: yes. Playwright: yes. I confirm the plan: run the whole chain without asking.

@@ -1,3 +1,0 @@
-# The planted spec expects the wrong greeting: npm test must run it against the real app and fail.
-1 failed
-Hello, Bob

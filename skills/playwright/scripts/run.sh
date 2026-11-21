@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # run.sh <project-dir> [--existing --path <p>] [--dev-port <n>]
 #
-# Adds e2e-playwright/ to a Triptych project: an npm project with a pinned @playwright/test (Chromium only), a config
-# whose webServer builds and starts the app (E2E_SERVER=jar, the default) or runs quarkus:dev (E2E_SERVER=dev), the
-# dev-mode warm-up, and the first specs. Then the README link.
-# Without --existing, the project must be fresh (triptych's example slice and nothing else): the specs are
-# example.spec.ts for GET /api/example and, when index.html bootstraps /uiroute/ExamplePage (htmx-hono's example),
-# guestbook.spec.ts. With --existing, any Triptych project: smoke.spec.ts loads --path, which is also the readiness URL.
-# Refuses a project that already has a Playwright setup. Never commits.
+# Adds e2e-playwright/ to a Triptych project with the htmx-hono frontend (inbound-http-json-vm): an npm project with a
+# pinned @playwright/test (Chromium only), a config whose webServer builds and starts the app (E2E_SERVER=jar, the
+# default) or runs quarkus:dev (E2E_SERVER=dev), the dev-mode warm-up, and the first spec. Then the README link.
+# Without --existing, the project must be fresh (triptych's example slice and nothing else) with htmx-hono's guestbook
+# (index.html bootstraps /uiroute/ExamplePage): the spec is guestbook.spec.ts, readiness /uiroute/ExamplePage.
+# With --existing, any such Triptych project: smoke.spec.ts loads --path, which is also the readiness URL.
+# Refuses a project without inbound-http-json-vm or with a Playwright setup already. Never commits.
 #   --dev-port  default: quarkus.http.port (%dev first) from app-server's application.properties, else 8080
 set -euo pipefail
 
@@ -32,6 +32,8 @@ done
   || die "$dir is not a Triptych project (needs core, an inbound-* module and app-server): apply triptych first"
 dir=$(cd "$dir" && pwd)
 [ -x "$dir/mvnw" ] || die "no ./mvnw in $dir: the webServer command uses the Maven wrapper"
+[ -f "$dir/inbound-http-json-vm/pom.xml" ] \
+  || die "no inbound-http-json-vm module: Playwright tests the htmx + Hono UI, apply the htmx-hono skill first"
 
 m=e2e-playwright
 [ ! -e "$dir/$m" ] || die "$m already exists: run the conformance check (references/conformance-check.md)"
@@ -44,7 +46,9 @@ if [ -z "$existing" ]; then
   [ -n "$receiver" ] || die "no triptych example slice (ExampleReceiver): not a fresh Triptych project, see --existing"
   features=$(find "$dir"/*/src/main/java -type d -path '*/feature/*' -prune -print | xargs -r -n1 basename | sort -u)
   [ "$features" = example ] || die "feature slices other than example exist ($(echo $features)): not a fresh Triptych project, see --existing"
-  path=/api/example
+  grep -rqs --include=index.html '/uiroute/ExamplePage' "$dir"/inbound-http-json-vm/src/main/resources/META-INF/resources \
+    || die "index.html does not bootstrap /uiroute/ExamplePage (htmx-hono's guestbook): see --existing"
+  path=/uiroute/ExamplePage
 else
   [ -n "$path" ] || die "--existing needs --path: a page or endpoint that answers 2xx once the app is up"
 fi
@@ -67,10 +71,7 @@ done
 cp "$templates/$m/gitignore" "$dir/$m/.gitignore"
 specs=""
 if [ -z "$existing" ]; then
-  cp "$templates/$m/tests/example.spec.ts" "$dir/$m/tests/"; specs=example.spec.ts
-  if grep -rqs --include=index.html '/uiroute/ExamplePage' "$dir"/inbound-*/src/main/resources/META-INF/resources; then
-    cp "$templates/$m/tests/guestbook.spec.ts" "$dir/$m/tests/"; specs="$specs guestbook.spec.ts"
-  fi
+  cp "$templates/$m/tests/guestbook.spec.ts" "$dir/$m/tests/"; specs=guestbook.spec.ts
 else
   cp "$templates/$m/tests/smoke.spec.ts" "$dir/$m/tests/"; specs=smoke.spec.ts
 fi

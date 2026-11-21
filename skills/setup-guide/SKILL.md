@@ -1,6 +1,6 @@
 ---
 name: setup-guide
-description: Start a new Quarkus multi-module project: asks every question up front, then chains the Bare project skill, the triptych architecture and the chosen technologies and Techniques (Kafka, validation, htmx + Hono, Playwright), committing after each step. Use when the user wants to start, create or set up a new project.
+description: Start a new Quarkus multi-module project: asks every question up front, then chains the Bare project skill, the triptych architecture and the chosen technologies and Techniques (Kafka, htmx + Hono, validation, Playwright), committing after each step. Use when the user wants to start, create or set up a new project.
 ---
 
 # Setup guide
@@ -11,25 +11,25 @@ Arguments: `$ARGUMENTS`
 
 ## Techniques
 
-The fixed, ordered chain. Order matters: each step adapts to what earlier steps added (validation's example covers Kafka when `inbound-kafka` exists; Playwright writes the spec for the htmx + Hono example page). `skill-tests/bin/check-technique-list` fails when a skill in `skills/` is missing from this table, so a new Technique skill is added here.
+The fixed, ordered chain. Order matters: each step adapts to what earlier steps added. Kafka and htmx + Hono come first and stand on their own; validation is optional on top, and its example converts Kafka's consumer and the htmx + Hono guestbook when they exist. Playwright tests the htmx + Hono UI, so it is only asked when htmx + Hono is chosen. `skill-tests/bin/check-technique-list` fails when a skill in `skills/` is missing from this table, so a new Technique skill is added here.
 
 | Step | Asked as | Skill | Extra `args` | Commit message |
 |---|---|---|---|---|
 | Bare project | always | `bare-project` | | (its own initial commit) |
 | Triptych | always | `triptych` | | `Apply triptych architecture` |
 | Kafka | "Kafka consumers (inbound-kafka)?" | `triptych` | `module=inbound-kafka`, plus `adapter=none` when validation is chosen too (its example consumer replaces triptych's) | `Add Kafka (inbound-kafka)` |
-| Validation | "Input validation (parse, don't validate)?" | `validation` | | `Apply validation` |
 | htmx + Hono | "HTML UI with htmx + Hono?" | `htmx-hono` | | `Add htmx + Hono frontend` |
-| Playwright | "Playwright browser tests?" | `playwright` | | `Add Playwright browser tests` |
+| Validation | "Input validation (parse, don't validate)?" | `validation` | | `Apply validation` |
+| Playwright | "Playwright browser tests?" (only when htmx + Hono is yes) | `playwright` | | `Add Playwright browser tests` |
 
 ## Steps
 
-1. **Target directory.** Take it from the arguments; else the current directory if it is empty (no entries at all, hidden ones included); else ask for one. Done when the directory is known and is missing or empty. A non-empty directory ends the run here, before any other question: the guide is for new projects only, and an existing project takes the Technique skills one by one (`/seswdevskills:triptych`, `validation`, `htmx-hono`, `playwright`).
+1. **Target directory.** Take it from the arguments; else the current directory if it is empty (no entries at all, hidden ones included); else ask for one. Done when the directory is known and is missing or empty. A non-empty directory ends the run here, before any other question: the guide is for new projects only, and an existing project takes the Technique skills one by one (`/seswdevskills:triptych`, `htmx-hono`, `validation`, `playwright`).
 2. **Ask everything.** Collect every answer before writing anything, taking what the arguments already give:
    - **artifact ID**: default the directory name
    - **group ID**: no default
    - **root package**: default `<groupId>.<artifactId without non-alphanumerics, lower-cased>`
-   - **yes/no, no defaults**: each "Asked as" question of the table, in order
+   - **yes/no, no defaults**: each "Asked as" question of the table, in order; Playwright only after a yes to htmx + Hono (a no there means no Playwright)
 
    Done when every input has an answer.
 3. **Confirm once.** Show one screen and wait for a yes:

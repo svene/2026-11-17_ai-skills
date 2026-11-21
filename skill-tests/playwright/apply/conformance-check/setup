@@ -1,5 +1,6 @@
-# Playwright first, htmx-hono later: the guestbook has no spec. Then drift (fixture): retries on CI.
+# htmx-hono, then Playwright; then drift: the guestbook spec is deleted (fixture-remove) and retries on CI is
+# planted (fixture).
 bare-project --group-id org.acme --artifact-id demo-app
 triptych
-playwright
 htmx-hono
+playwright

@@ -1,6 +1,6 @@
 # Writing specs
 
-One spec per page or flow in `e2e-playwright/tests/`, named after it (`orders.spec.ts`). `tests/guestbook.spec.ts` (with htmx-hono) and `tests/example.spec.ts` are the worked examples.
+One spec per page or flow in `e2e-playwright/tests/`, named after it (`orders.spec.ts`). `tests/guestbook.spec.ts` (htmx-hono's guestbook) is the worked example.
 
 ## Add a spec
 

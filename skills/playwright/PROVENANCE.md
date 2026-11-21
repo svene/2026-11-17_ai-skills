@@ -10,6 +10,6 @@ The changes made when copying:
 - **`./mvnw -B`** instead of `mvn`. The hono source's separate `npm run build` is dropped, since htmx-hono's bundle builds inside `mvn package`.
 - **No retries anywhere** (the hono source retried twice on CI), screenshot and trace kept on failure, Chromium only, no HTML reporter.
 - **Exact versions** for `@playwright/test` and `@types/node` (both sources use `^` ranges).
-- **Specs:** `example.spec.ts` for triptych's `feature.example`, and `guestbook.spec.ts` for htmx-hono's guestbook, which adds paired `waitForResponse`, anchored route matches and the 5xx path through `page.route`. Neither source has them. The sources' own specs are not copied.
+- **Specs:** `guestbook.spec.ts` for htmx-hono's guestbook (Playwright requires htmx-hono), with paired `waitForResponse`, anchored route matches and the 5xx path through `page.route`. Neither source has them. The sources' own specs are not copied.
 
 Decided in [Decide the Playwright skill](https://github.com/svene/2026-11-17_ai-skills/issues/10), as amended there.

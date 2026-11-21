@@ -13,7 +13,7 @@ Walk the checklist over `e2e-playwright/`, the README and `.gitignore`. Every ro
 | Check | Severity |
 |---|---|
 | htmx-hono's example is present (`index.html` bootstraps `/uiroute/ExamplePage`) but `tests/guestbook.spec.ts` is missing: copy it from the templates | major |
-| `retries` above 0, or a `waitForTimeout` in a spec | major |
+| `retries` above 0 anywhere, CI included (`process.env.CI ? 2 : 0` is a finding: a retry hides a flaky test), or a `waitForTimeout` in a spec | major |
 | `webServer` missing, or the jar mode reuses an existing server | major |
 | ports or the readiness URL written outside `server.ts` | minor |
 | `@playwright/test` not pinned to an exact version | minor |
